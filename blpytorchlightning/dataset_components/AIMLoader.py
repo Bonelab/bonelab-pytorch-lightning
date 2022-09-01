@@ -18,8 +18,7 @@ class AIMLoader(BaseFileLoader):
     """ Class for loading AIM images (and masks) from a directory, aligning them, and returning as numpy arrays."""
 
     def __init__(self, path: str, pattern: str) -> None:
-        """
-        Initialization method.
+        """ Initialization method.
 
         Parameters
         ----------
