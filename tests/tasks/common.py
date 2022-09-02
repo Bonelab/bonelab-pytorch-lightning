@@ -3,7 +3,7 @@ from __future__ import annotations
 import torch
 from typing import Callable
 
-from blpytorchlightning.models.UNet2D import UNet2D
+from blpytorchlightning.models.UNet import UNet2D
 
 
 def get_torch_module():

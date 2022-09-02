@@ -73,9 +73,8 @@ Should all inherit from `pytorch_lightning.LightningModule`.
 ---
 ## Contributing
 
-This project uses unit testing and style guide enforcement.
-
-
+This project uses unit testing and style guide enforcement. PyCharm CE is highly recommended as a text editor / IDE. 
+It will integrate with your `conda` environment and highlight most, if not all, style errors as you go.
 
 If you want to add something:
 
@@ -114,7 +113,6 @@ To run all tests at the root level (`bonelab-pytorch-lightning/`):
 ```commandline
 nosetest tests
 ```
-
 ### 5. Ensure style conformance:
 
 First, run `black` at the root level (`bonelab-pytorch-lightning/`):

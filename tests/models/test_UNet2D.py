@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.models.UNet2D import Layer2D, UNet2D
+from blpytorchlightning.models.UNet import Layer2D, UNet2D
 
 
 class TestLayer2D(unittest.TestCase):
