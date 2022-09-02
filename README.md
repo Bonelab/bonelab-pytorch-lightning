@@ -1,6 +1,7 @@
 # bonelab-pytorch-lightning
 Tasks, dataset components, loss functions, and utilities for using pytorch lightning for deep learning with medical image data.
 
+---
 ## Setup
 
 ### 1. Set up the recommended `blptl` conda environment:
@@ -46,3 +47,96 @@ pip install -e .
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 ### 4. Create a separate project directory and easily write scripts for training models using the `blptl` environment!
+
+---
+## How to use
+
+Full sphinx auto-documentation coming soon...
+
+The installed package can be imported at the root level as `blpytorchlightning`.
+
+`blpytorchlightning.dataset_components` - Components for loading, sampling, and transforming data. 
+Used for constructing pytorch `Datasets` by composition. 
+See `blpytorchlightning.dataset_components.HRpQCTDataset:HRpQCTDataset` for an example of a composed `Dataset`
+
+`blpytorchlightning.loss_functions` - Custom differentiable loss functions.
+
+`blpytorchlightning.models` - Custom implemented `torch` models e.g. for classification or segmentation.
+Should all inherit from `torch.nn.Module`.
+
+`blpytorchlightning.tasks` - Custom implemented `pytorch-lightning` "tasks." 
+They abstract away much of the boilerplate code required for a typical deep learning task, e.g. segmentation.
+Should all inherit from `pytorch_lightning.LightningModule`.
+
+`blpytorchlightning.utils` - Utility functions such as for converting level set embeddings to masks, or detecting zero crossings.
+
+---
+## Contributing
+
+This project uses unit testing and style guide enforcement.
+
+
+
+If you want to add something:
+
+### 1. Create a new branch
+
+```commandline
+git pull
+git checkout -b <your-name>/<short-description-of-what-you-are-adding>
+```
+
+e.g.
+
+```commandline
+git pull
+git checkout -b nathan/add-new-vision-transformer-model
+```
+
+### 2. Add or modify code.
+
+Type-hinting and numpy-style doc strings are mandatory for all functions and class methods
+(otherwise it's too hard for others to figure out how to use them).
+If you are adding code that is based on published work then please make sure to put references to the corresponding
+paper(s) in your doc-strings.
+
+### 3. Write tests
+
+Currently, unit tests are written using the `unittest` package. We may upgrade at some point. 
+Tests are all located in the `tests/` directory, with a directory structure that mirrors that of the source files.
+If you add a module, add a corresponding test sub-directory. If you add a class or function, add a `unittest.TestCase`.
+If you add functionality to an existing class or method, add appropriate test methods to the existing test case.
+
+### 4. Run tests
+
+To run all tests at the root level (`bonelab-pytorch-lightning/`):
+
+```commandline
+nosetest tests
+```
+
+### 5. Ensure style conformance:
+
+First, run `black` at the root level (`bonelab-pytorch-lightning/`):
+```commandline
+black blpytorchlightning
+```
+
+This will automatically fix most style errors.
+
+Second, run `flake8` at the root level (`bonelab-pytorch-lightning/`):
+
+```commandline
+flake8
+```
+
+If there is no terminal output, there's no problems. If there is terminal output, those are style errors that `black`
+couldn't fix and that you should go and correct before trying to merge your code.
+
+### 6. Submit a pull request
+
+The easiest way to do this is from the web interface. Go to https://github.com/Bonelab/bonelab-pytorch-lightning, 
+switch to your branch, and click the button that says "submit pull request." 
+If the tests and style checks pass it can be merged.
+
+[Full explanation on GitHub Docs.](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)

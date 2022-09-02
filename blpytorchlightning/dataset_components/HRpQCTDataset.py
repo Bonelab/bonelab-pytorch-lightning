@@ -8,9 +8,15 @@ import yaml
 from torch.utils.data import Dataset
 from typing import Optional, Union
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseFileLoader
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseSampler
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseTransformer
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+    BaseFileLoader,
+)
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+    BaseSampler,
+)
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+    BaseTransformer,
+)
 
 
 class HRpQCTDataset(Dataset):

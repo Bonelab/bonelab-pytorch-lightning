@@ -4,7 +4,9 @@ import numpy as np
 import torch
 from typing import Union
 
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import BaseTransformer
+from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+    BaseTransformer,
+)
 
 
 class ComposedTransformers(BaseTransformer):
@@ -22,8 +24,8 @@ class ComposedTransformers(BaseTransformer):
         self.transformers = transformers
 
     def __call__(
-            self,
-            sample: Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]],
+        self,
+        sample: Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]],
     ) -> Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]:
         """
         Function call magic method.
