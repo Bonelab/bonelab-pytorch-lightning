@@ -13,7 +13,7 @@ import torch.nn as nn
 
 # the repeating structure of the UNet, which occurs in each layer on the
 # way down and up the encoder and decoder
-class Layer2D(nn.Module):
+class Layer(nn.Module):
     """
     Layer2D - the repeating unit of the 2D UNet.
 
@@ -30,6 +30,7 @@ class Layer2D(nn.Module):
         stride: int,
         groups: int,
         dropout: float,
+        is_3d: bool = False,
     ) -> None:
         """
         Initialization method for the Layer2D class.
@@ -57,16 +58,21 @@ class Layer2D(nn.Module):
         dropout : float
             The dropout rate, between 0 and 1 inclusive, for the two Dropout layers.
 
+        is_3d : bool
+            Flag that can be set to swap 2D layers for 3D layers. Default: `False`
         """
         super().__init__()
+
+        conv = nn.Conv3d if is_3d else nn.Conv2d
+
         self.layer = nn.Sequential(
-            nn.Conv2d(
+            conv(
                 inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride
             ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
             nn.Dropout2d(dropout),
-            nn.Conv2d(
+            conv(
                 outputs,
                 outputs,
                 kernel_size=kernel_size,
@@ -95,7 +101,7 @@ class Layer2D(nn.Module):
         return self.layer(x)
 
 
-class UNet2D(nn.Module):
+class UNet(nn.Module):
     """
     UNet2D - Takes an image as input, returns a segmentation (or level-set embedding of segmentation) as output.
     """
@@ -108,6 +114,7 @@ class UNet2D(nn.Module):
         channels_per_group: int,
         dropout: float,
         upsample_mode: str = "bilinear",
+        is_3d: bool = False,
     ) -> None:
         """
         The initialization function
@@ -137,6 +144,8 @@ class UNet2D(nn.Module):
             The mode of upsampling to use on the decoder half of the network. Can be one of 'nearest', 'linear',
             'bilinear', 'bicubic' and 'trilinear'. Default: 'bilinear'.
 
+        is_3d : bool
+            Flag that can be set to swap 2D layers for 3D layers. Default: `False`
         """
         super().__init__()
         # layers
@@ -148,13 +157,14 @@ class UNet2D(nn.Module):
         # down and upsampling
         self.scale_factor = 2
         self.upsample_mode = upsample_mode
+        self.is_3d = is_3d
         # initialize some module lists for the 4 types of operations
         self.layer_down = nn.ModuleList()
         self.down = nn.ModuleList()
         self.layer_up = nn.ModuleList()
         self.up = nn.ModuleList()
         self.layer_down.append(
-            Layer2D(
+            Layer(
                 input_channels,
                 num_filters[0],
                 self.layer_kernel_size,
@@ -162,12 +172,13 @@ class UNet2D(nn.Module):
                 self.layer_stride,
                 num_filters[0] // self.channels_per_group,
                 self.dropout,
+                self.is_3d,
             )
         )
         for fi in range(1, len(num_filters)):
             self.down.append(nn.MaxPool2d(self.scale_factor))
             self.layer_down.append(
-                Layer2D(
+                Layer(
                     num_filters[fi - 1],
                     num_filters[fi],
                     self.layer_kernel_size,
@@ -175,13 +186,14 @@ class UNet2D(nn.Module):
                     self.layer_stride,
                     num_filters[fi] // self.channels_per_group,
                     self.dropout,
+                    self.is_3d,
                 )
             )
             self.up.append(
                 nn.Upsample(scale_factor=self.scale_factor, mode=self.upsample_mode)
             )
             self.layer_up.append(
-                Layer2D(
+                Layer(
                     2 * num_filters[fi - 1],
                     num_filters[fi - 1],
                     self.layer_kernel_size,
@@ -189,9 +201,13 @@ class UNet2D(nn.Module):
                     self.layer_stride,
                     num_filters[fi - 1] // self.channels_per_group,
                     self.dropout,
+                    self.is_3d,
                 )
             )
-        self.map_to_output = nn.Conv2d(
+
+        conv = nn.Conv3d if is_3d else nn.Conv2d
+
+        self.map_to_output = conv(
             num_filters[0], output_classes, kernel_size=1, stride=1
         )
 

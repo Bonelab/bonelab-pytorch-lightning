@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.models.UNet import Layer2D, UNet2D
+from blpytorchlightning.models.UNet import Layer, UNet
 
 
 class TestLayer2D(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestLayer2D(unittest.TestCase):
             "groups": 4,
             "dropout": 0.3
         }
-        Layer2D(**layer_spec)
+        Layer(**layer_spec)
 
 
 class TestUNet2D(unittest.TestCase):
@@ -30,4 +30,4 @@ class TestUNet2D(unittest.TestCase):
             "channels_per_group": 4,
             "dropout": 0.3
         }
-        UNet2D(**unet_spec)
+        UNet(**unet_spec)

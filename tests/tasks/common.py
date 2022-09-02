@@ -3,7 +3,7 @@ from __future__ import annotations
 import torch
 from typing import Callable
 
-from blpytorchlightning.models.UNet import UNet2D
+from blpytorchlightning.models.UNet import UNet
 
 
 def get_torch_module():
@@ -14,7 +14,7 @@ def get_torch_module():
         "channels_per_group": 4,
         "dropout": 0.3
     }
-    return UNet2D(**unet_spec)
+    return UNet(**unet_spec)
 
 
 def get_embedding_conversion_function() -> Callable[[torch.Tensor], torch.Tensor]:
