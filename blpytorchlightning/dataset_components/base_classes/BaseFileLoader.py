@@ -34,7 +34,7 @@ class BaseFileLoader(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+    def __getitem__(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """
         A magic method to return a sample. Samples should be tuples where the first element is the input and the
         second element is the target. Necessary to function as an iterator.
@@ -45,7 +45,7 @@ class BaseFileLoader(metaclass=ABCMeta):
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             A sample, consisting of an input and target pair.
         """
         pass

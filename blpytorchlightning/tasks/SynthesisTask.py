@@ -8,8 +8,9 @@ from blpytorchlightning.utils.error_metrics import dice_similarity_coefficient
 
 
 class SynthesisTask(ptl.LightningModule):
-
-    def __init__(self, synthesis_model, segmentation_task, loss_function, learning_rate):
+    def __init__(
+        self, synthesis_model, segmentation_task, loss_function, learning_rate
+    ):
         super().__init__()
         self.synthesis_model = synthesis_model
         self.segmentation_task = segmentation_task
@@ -23,7 +24,7 @@ class SynthesisTask(ptl.LightningModule):
         y_hat = self.synthesis_model(z)
         loss = self.loss_function(y_hat, y)
         dsc = dice_similarity_coefficient(y_hat, y)
-        metrics = {'train_loss': loss, 'train_dsc': dsc}
+        metrics = {"train_loss": loss, "train_dsc": dsc}
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return loss
 
@@ -33,7 +34,7 @@ class SynthesisTask(ptl.LightningModule):
         y_hat = self.synthesis_model(z)
         loss = self.loss_function(y_hat, y)
         dsc = dice_similarity_coefficient(y_hat, y)
-        metrics = {'val_loss': loss, 'val_dsc': dsc}
+        metrics = {"val_loss": loss, "val_dsc": dsc}
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return metrics
 
@@ -42,7 +43,7 @@ class SynthesisTask(ptl.LightningModule):
         y_hat = self.synthesis_model(self._frozen_segmentation(x))
         loss = self.loss_function(y_hat, y)
         dsc = dice_similarity_coefficient(y_hat, y)
-        metrics = {'test_loss': loss, 'test_dsc': dsc}
+        metrics = {"test_loss": loss, "test_dsc": dsc}
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return metrics
 
@@ -88,13 +89,10 @@ class SynthesisTask(ptl.LightningModule):
         z[:, 0, ...] = x[:, 0, ...]  # first channel is just the image itself
         for c in [1, 2, 3]:
             preds = self.segmentation_task(
-                torch.cat(
-                    torch.split(x, 1, dim=(c + 1)),
-                    dim=0
-                ).squeeze(c + 1)
+                torch.cat(torch.split(x, 1, dim=(c + 1)), dim=0).squeeze(c + 1)
             )
             print(preds.shape)
-            '''
+            """
             x_slice = [slice(None)]*len(x_shape)
             z_slice = [slice(None)]*len(z_shape)
             x_slice[1], z_slice[1] = [0], [c]
@@ -107,5 +105,5 @@ class SynthesisTask(ptl.LightningModule):
                 # corresponding to the current channel
                 x_slice[c+1], z_slice[c+1] = i, i
                 z[tuple(z_slice)] = self.segmentation_task(x[tuple(x_slice)])
-            '''
+            """
         return z

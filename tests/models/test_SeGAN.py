@@ -134,4 +134,3 @@ class TestGetSegmentorAndDiscriminators(unittest.TestCase):
         assert (isinstance(discriminators, list))
         for d in discriminators:
             assert (isinstance(d, Discriminator))
-

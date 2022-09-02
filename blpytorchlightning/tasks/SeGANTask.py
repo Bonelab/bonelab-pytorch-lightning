@@ -3,7 +3,7 @@ from __future__ import annotations
 import torch
 import pytorch_lightning as ptl
 from torch.optim import AdamW
-from itertools import chain
+from typing import Callable
 
 from blpytorchlightning.utils.error_metrics import dice_similarity_coefficient
 
@@ -16,12 +16,13 @@ class SeGANTask(ptl.LightningModule):
     Adds dice similarity coefficient to the metrics that are computed during training.
     """
 
-    def __init__(self,
-                 segmentor: torch.nn.Module,
-                 discriminators: List[torch.nn.Module],
-                 loss_function: Callable[[torch.Tensor], torch.Tensor],
-                 learning_rate: float
-                 ) -> None:
+    def __init__(
+        self,
+        segmentor: torch.nn.Module,
+        discriminators: list[torch.nn.Module],
+        loss_function: Callable[[torch.Tensor], torch.Tensor],
+        learning_rate: float,
+    ) -> None:
         """
         Initialization method.
 
@@ -30,7 +31,7 @@ class SeGANTask(ptl.LightningModule):
         segmentor : torch.nn.Module
             A pytorch module for segmenting images. Should take an image and return a segmentation.
 
-        discriminators : List[torch.nn.Module]
+        discriminators : list[torch.nn.Module]
             A list of pytorch modules for generating useful multi-scale feature maps from segmentation-masked images.
             Should take an image and return a list of pytorch tensors with feature maps at several levels of resolution.
 
@@ -49,17 +50,18 @@ class SeGANTask(ptl.LightningModule):
         self.loss_function = loss_function
         self.learning_rate = learning_rate
 
-    def training_step(self,
-                      batch: Tuple[torch.Tensor, torch.Tensor],
-                      batch_idx: int,
-                      optimizer_idx: int
-                      ) -> torch.Tensor:
+    def training_step(
+        self,
+        batch: tuple[torch.Tensor, torch.Tensor],
+        batch_idx: int,
+        optimizer_idx: int,
+    ) -> torch.Tensor:
         """
         Training step method. Negate the loss value if the discriminators are being trained.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a training step.
 
         batch_idx : int
@@ -79,7 +81,10 @@ class SeGANTask(ptl.LightningModule):
         stage = f"train_opt{optimizer_idx}"
         x, y = batch
         y_hat, loss = self._compute_segmentation_and_loss(x, y)
-        metrics = {f"{stage}_loss": loss.detach(), **self._get_dsc_metrics(y_hat, y, stage)}
+        metrics = {
+            f"{stage}_loss": loss.detach(),
+            **self._get_dsc_metrics(y_hat, y, stage),
+        }
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
 
         if optimizer_idx == 0:
@@ -88,17 +93,21 @@ class SeGANTask(ptl.LightningModule):
 
         if optimizer_idx == 1:
             # training the discriminators
-            loss *= -1  # negate the loss since the discriminators want to maximize the differences
+            loss *= (
+                -1
+            )  # negate the loss since the discriminators want to maximize the differences
 
         return loss
 
-    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> Dict[torch.Tensor]:
+    def validation_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> dict[torch.Tensor]:
         """
         Validation step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a validation step.
 
         batch_idx : int
@@ -107,23 +116,28 @@ class SeGANTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[torch.Tensor]
+        dict[torch.Tensor]
             A dictionary of performance metrics.
         """
         stage = "val"
         x, y = batch
         y_hat, loss = self._compute_segmentation_and_loss(x, y)
-        metrics = {f"{stage}_loss": loss.detach(), **self._get_dsc_metrics(y_hat, y, stage)}
+        metrics = {
+            f"{stage}_loss": loss.detach(),
+            **self._get_dsc_metrics(y_hat, y, stage),
+        }
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return metrics
 
-    def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> Dict[torch.Tensor]:
+    def test_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> dict[torch.Tensor]:
         """
         Testing step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -132,26 +146,28 @@ class SeGANTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[torch.Tensor]
+        dict[torch.Tensor]
             A dictionary of performance metrics.
         """
         stage = "test"
         x, y = batch
         y_hat, loss = self._compute_segmentation_and_loss(x, y)
-        metrics = {f"{stage}_loss": loss.detach(), **self._get_dsc_metrics(y_hat, y, stage)}
+        metrics = {
+            f"{stage}_loss": loss.detach(),
+            **self._get_dsc_metrics(y_hat, y, stage),
+        }
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return metrics
 
-    def predict_step(self,
-                     batch: Tuple[torch.Tensor, torch.Tensor],
-                     batch_idx: int
-                     ) -> torch.Tensor:
+    def predict_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         """
         Prediction step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -182,23 +198,24 @@ class SeGANTask(ptl.LightningModule):
         """
         return self.segmentor(x)
 
-    def configure_optimizers(self) -> Tuple[AdamW, AdamW]:
+    def configure_optimizers(self) -> tuple[AdamW, AdamW]:
         """
         Required method, must return an optimizer for use in training.
         Parameter group 0 is the segmentor, group 1 is the discriminators
 
         Returns
         -------
-        Tuple[AdamW, AdamW]
+        tuple[AdamW, AdamW]
         """
         segmentor_optimizer = AdamW(self.segmentor.parameters(), lr=self.learning_rate)
-        discriminators_optimizer = AdamW(self.discriminators.parameters(), lr=self.learning_rate)
+        discriminators_optimizer = AdamW(
+            self.discriminators.parameters(), lr=self.learning_rate
+        )
         return segmentor_optimizer, discriminators_optimizer
 
-    def _compute_segmentation_and_loss(self,
-                                       x: torch.Tensor,
-                                       y: torch.Tensor
-                                       ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _compute_segmentation_and_loss(
+        self, x: torch.Tensor, y: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         The basic segmentation step method used by all the other step methods.
         Segments an image, calculates the multi-scale features from the image masked with the true segmentation
@@ -214,7 +231,7 @@ class SeGANTask(ptl.LightningModule):
 
         Returns
         -------
-        Tuple[torch.Tensor, Optional[Dict[Torch.Tensor]]]
+        tuple[torch.Tensor, Optional[dict[torch.Tensor]]]
             The predicted segmentation and the L1 loss from the multi-scale feature maps.
         """
         y_hat = self.segmentor(x)
@@ -225,15 +242,15 @@ class SeGANTask(ptl.LightningModule):
             true_features = d(x_true_masked)
             pred_features = d(x_pred_masked)
             for tf, pf in zip(true_features, pred_features):
-                loss += self.loss_function(pf, tf) / (len(true_features) * len(self.discriminators))
+                loss += self.loss_function(pf, tf) / (
+                    len(true_features) * len(self.discriminators)
+                )
         return y_hat, loss
 
     @staticmethod
     def _get_dsc_metrics(
-            y_hat: torch.Tensor,
-            y: torch.Tensor,
-            stage: str
-    ) -> Dict[Torch.Tensor]:
+        y_hat: torch.Tensor, y: torch.Tensor, stage: str
+    ) -> dict[torch.Tensor]:
         """
         Static method for adding the dice similarity coefficient to the metrics dictionary.
 
@@ -251,7 +268,7 @@ class SeGANTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[Torch.Tensor]
+        dict[torch.Tensor]
             A dictionary with the dice similarity coefficient values for each class in the segmentation.
         """
         metrics = {}
@@ -259,5 +276,5 @@ class SeGANTask(ptl.LightningModule):
         y_hat = torch.argmax(y_hat, dim=1)
         for c in range(num_classes):
             dsc = dice_similarity_coefficient(y == c, y_hat == c)
-            metrics[f'{stage}_dsc_{c}'] = dsc
+            metrics[f"{stage}_dsc_{c}"] = dsc
         return metrics

@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as torchfunc
 
 from blpytorchlightning.utils.spatial_derivative_kernels import (
-    get_2d_first_derivative_kernels, get_2d_second_derivative_kernels
+    get_2d_first_derivative_kernels,
+    get_2d_second_derivative_kernels,
 )
 from blpytorchlightning.utils.zero_crossings import zero_crossings
 
@@ -32,15 +33,14 @@ class CurvatureLoss(nn.Module):
         self.curvature_threshold = curvature_threshold
         self.kernels = {
             **get_2d_first_derivative_kernels(),
-            **get_2d_second_derivative_kernels()
+            **get_2d_second_derivative_kernels(),
         }
         self.denominators = {
-            'ddx': vox_width,
-            'ddy': vox_width,
-            'd2dx2': vox_width ** 2,
-            'd2dy2': vox_width ** 2,
-            'd2dxdy': vox_width ** 2
-
+            "ddx": vox_width,
+            "ddy": vox_width,
+            "d2dx2": vox_width**2,
+            "d2dy2": vox_width**2,
+            "d2dxdy": vox_width**2,
         }
 
     def forward(self, phi: torch.Tensor) -> torch.Tensor:
@@ -59,18 +59,23 @@ class CurvatureLoss(nn.Module):
         """
         grads = {}
         for k, v in self.kernels.items():
-            torch_kernel = torch.tensor(v, device=phi.device, dtype=phi.dtype).unsqueeze(0).unsqueeze(0)
+            torch_kernel = (
+                torch.tensor(v, device=phi.device, dtype=phi.dtype)
+                .unsqueeze(0)
+                .unsqueeze(0)
+            )
             grads[k] = torchfunc.conv2d(phi, torch_kernel) / self.denominators[k]
         curvature_numerator = (
-                grads['d2dxdy'] * torch.pow(grads['ddy'], 2)
-                - 2 * grads['ddy'] * grads['ddx'] * grads['d2dxdy']
-                + grads['d2dxdy'] * torch.pow(grads['ddx'], 2)
+            grads["d2dxdy"] * torch.pow(grads["ddy"], 2)
+            - 2 * grads["ddy"] * grads["ddx"] * grads["d2dxdy"]
+            + grads["d2dxdy"] * torch.pow(grads["ddx"], 2)
         )
         curvature_denominator = torch.pow(
-            torch.pow(grads['ddx'], 2) + torch.pow(grads['ddy'], 2),
-            3 / 2
+            torch.pow(grads["ddx"], 2) + torch.pow(grads["ddy"], 2), 3 / 2
         )
         curvature = curvature_numerator / (curvature_denominator + self.eps)
-        curvature_relu = torchfunc.relu(torch.pow(curvature / (self.curvature_thresh + self.eps), 2) - 1)
+        curvature_relu = torchfunc.relu(
+            torch.pow(curvature / (self.curvature_thresh + self.eps), 2) - 1
+        )
         phi_zero = zero_crossings(phi)
         return torch.sum(phi_zero * curvature_relu) / (torch.sum(phi_zero) + self.eps)

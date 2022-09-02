@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import torch
+from typing import Callable, Optional
 
 from blpytorchlightning.tasks.SegmentationTask import SegmentationTask
 
@@ -11,15 +13,15 @@ class SegmentationEmbeddingTask(SegmentationTask):
     """
 
     def __init__(
-            self,
-            model: torch.nn.Module,
-            embedding_conversion_function: Callable[[torch.Tensor], torch.Tensor],
-            classification_loss_function: Callable[[torch.Tensor], torch.Tensor],
-            curvature_loss_function: Callable[[torch.Tensor], torch.Tensor],
-            maggrad_loss_function: Callable[[torch.Tensor], torch.Tensor],
-            learning_rate: float,
-            lambda_curvature: float = 1e-3,
-            lambda_maggrad: float = 1e-3
+        self,
+        model: torch.nn.Module,
+        embedding_conversion_function: Callable[[torch.Tensor], torch.Tensor],
+        classification_loss_function: Callable[[torch.Tensor], torch.Tensor],
+        curvature_loss_function: Callable[[torch.Tensor], torch.Tensor],
+        maggrad_loss_function: Callable[[torch.Tensor], torch.Tensor],
+        learning_rate: float,
+        lambda_curvature: float = 1e-3,
+        lambda_maggrad: float = 1e-3,
     ):
         """
         Initialization method.
@@ -52,11 +54,11 @@ class SegmentationEmbeddingTask(SegmentationTask):
         super().__init__(model, None, learning_rate)
         self.embedding_conversion_function = embedding_conversion_function
         self.loss_functions = {
-            'classification': classification_loss_function,
-            'curvature': curvature_loss_function,
-            'maggrad': maggrad_loss_function
+            "classification": classification_loss_function,
+            "curvature": curvature_loss_function,
+            "maggrad": maggrad_loss_function,
         }
-        self.lambdas = {'curvature': lambda_curvature, 'maggrad': lambda_maggrad}
+        self.lambdas = {"curvature": lambda_curvature, "maggrad": lambda_maggrad}
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -92,18 +94,16 @@ class SegmentationEmbeddingTask(SegmentationTask):
         """
         return self.model(x)
 
-    def _basic_step(self,
-                    batch: Tuple[torch.Tensor, torch.Tensor],
-                    batch_idx: int,
-                    stage: str
-                    ) -> Tuple[torch.Tensor, Optional[Dict[Torch.Tensor]]]:
+    def _basic_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
+    ) -> tuple[torch.Tensor, Optional[dict[torch.Tensor]]]:
         """
         The basic segmentation step method used by all the other step methods.
         Segments an image, returns loss and metrics.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -116,28 +116,28 @@ class SegmentationEmbeddingTask(SegmentationTask):
 
         Returns
         -------
-        Tuple[torch.Tensor, Optional[Dict[Torch.Tensor]]]
+        tuple[torch.Tensor, Optional[dict[torch.Tensor]]]
             The first element of the tuple is the loss value with the graph attached for backprop. The second
             element of the tuple is the metrics dictionary.
         """
         loss_dict = {}
         x, y = batch
         phi = self.model(x)
-        loss_dict['curvature'] = 0
-        loss_dict['maggrad'] = 0
+        loss_dict["curvature"] = 0
+        loss_dict["maggrad"] = 0
         for i in range(phi.shape[1]):
-            loss_dict['curvature'] += self.loss_functions['curvature'](phi[:, [i], ...])
-            loss_dict['maggrad'] += self.loss_functions['maggrad'](phi[:, [i], ...])
+            loss_dict["curvature"] += self.loss_functions["curvature"](phi[:, [i], ...])
+            loss_dict["maggrad"] += self.loss_functions["maggrad"](phi[:, [i], ...])
         y_hat = self.embedding_conversion_function(phi)
-        classification_loss = self.loss_functions['classification'](y_hat, y)
-        loss_dict['total'] = (
-                classification_loss
-                + self.lambdas['curvature'] * loss_dict['curvature']
-                + self.lambdas['maggrad'] * loss_dict['maggrad']
+        classification_loss = self.loss_functions["classification"](y_hat, y)
+        loss_dict["total"] = (
+            classification_loss
+            + self.lambdas["curvature"] * loss_dict["curvature"]
+            + self.lambdas["maggrad"] * loss_dict["maggrad"]
         )
         metrics = {}
         for k, v in loss_dict.items():
-            metrics[f'{stage}_{k}_loss'] = v
-        metrics = {**metrics, **self._get_dsc_metrics(y_het, y, stage)}
+            metrics[f"{stage}_{k}_loss"] = v
+        metrics = {**metrics, **self._get_dsc_metrics(y_hat, y, stage)}
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
-        return loss_dict['total'], metrics
+        return loss_dict["total"], metrics

@@ -1,42 +1,47 @@
 from __future__ import annotations
 
 import os
+import numpy as np
 import pickle
 import torch
+from typing import Optional, Union
 
 from dataclasses import dataclass
 from torch.utils.data import Dataset
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import BaseTransformer
+from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+    BaseTransformer,
+)
 
 
 @dataclass
 class PickledData:
-    """ Class for tracking and loading pickled samples """
+    """Class for tracking and loading pickled samples"""
+
     path: str
     epoch: int = 0
 
-    def load_sample(self) -> Tuple[np.ndarray, np.ndarray]:
+    def load_sample(self) -> tuple[np.ndarray, np.ndarray]:
         """
         Load the pickle file and increment the epoch counter.
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             The sample.
         """
-        sample_fn = os.path.join(self.path, f'epoch_{self.epoch:d}.pickle')
+        sample_fn = os.path.join(self.path, f"epoch_{self.epoch:d}.pickle")
         if not os.path.exists(sample_fn):
             self.epoch = 0
-            sample_fn = os.path.join(self.path, f'epoch_{self.epoch:d}.pickle')
+            sample_fn = os.path.join(self.path, f"epoch_{self.epoch:d}.pickle")
             if not os.path.exists(sample_fn):
-                raise FileNotFoundError(f'No pickle file for epoch 0 in {self.path}')
-        with open(sample_fn, 'rb') as f:
+                raise FileNotFoundError(f"No pickle file for epoch 0 in {self.path}")
+        with open(sample_fn, "rb") as f:
             sample = pickle.load(f)
         self.epoch += 1
         return sample
 
     def reset(self) -> None:
-        """ Reset back to epoch 0 for new training """
+        """Reset back to epoch 0 for new training"""
         self.epoch = 0
 
 
@@ -50,7 +55,9 @@ class PickledDataset(Dataset):
     method to have the Dataset load, sample, and pickle your data. See `HRpQCTDataset` for an example.
     """
 
-    def __init__(self, folder: str, transformer: Optional[BaseTransformer] = None) -> None:
+    def __init__(
+        self, folder: str, transformer: Optional[BaseTransformer] = None
+    ) -> None:
         """
         Initialization method
 
@@ -64,7 +71,9 @@ class PickledDataset(Dataset):
 
         """
         super().__init__()
-        self._sample_list = [PickledData(f.path) for f in os.scandir(folder) if f.is_dir()]
+        self._sample_list = [
+            PickledData(f.path) for f in os.scandir(folder) if f.is_dir()
+        ]
         self.transformer = transformer
 
     def __len__(self) -> int:
@@ -77,7 +86,9 @@ class PickledDataset(Dataset):
         """
         return len(self._sample_list)
 
-    def __getitem__(self, idx: int) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[torch.Tensor, torch.Tensor]]:
+    def __getitem__(
+        self, idx: int
+    ) -> Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]:
         """
         Use the PickledData class method `load_data` to return a sample
 
@@ -88,7 +99,7 @@ class PickledDataset(Dataset):
 
         Returns
         -------
-        Union[Tuple[np.ndarray, np.ndarray], Tuple[torch.Tensor, torch.Tensor]]
+        Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]
             The sample.
         """
         sample = self._sample_list[idx].load_sample()
@@ -97,6 +108,6 @@ class PickledDataset(Dataset):
         return sample
 
     def reset(self) -> None:
-        """ Reset all samples to epoch 0 """
+        """Reset all samples to epoch 0"""
         for s in self._sample_list:
             s.reset()

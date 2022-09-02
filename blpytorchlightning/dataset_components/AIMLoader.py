@@ -8,17 +8,19 @@ from bonelab.util.aim_calibration_header import get_aim_density_equation
 from bonelab.util.vtk_util import vtkImageData_to_numpy
 from enum import Enum
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseFileLoader
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+    BaseFileLoader,
+)
 
 # create an ImageType Enum with two options: density image or mask
 ImageType = Enum("ImageType", "DENSITY MASK")
 
 
 class AIMLoader(BaseFileLoader):
-    """ Class for loading AIM images (and masks) from a directory, aligning them, and returning as numpy arrays."""
+    """Class for loading AIM images (and masks) from a directory, aligning them, and returning as numpy arrays."""
 
     def __init__(self, path: str, pattern: str) -> None:
-        """ Initialization method.
+        """Initialization method.
 
         Parameters
         ----------
@@ -77,7 +79,7 @@ class AIMLoader(BaseFileLoader):
         """
         return len(self._image_list)
 
-    def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+    def __getitem__(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """
         Return the tuple of image and masks for the given image.
 
@@ -88,7 +90,7 @@ class AIMLoader(BaseFileLoader):
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             First element: the density image as a numpy array of shape (1,D,H,W)
             Second element: the masks as a numpy array of shape (3,D,H,W).
             Mask order is cortical, trabecular, background
@@ -96,7 +98,7 @@ class AIMLoader(BaseFileLoader):
         image_fn = self._image_list[idx]
         return self._get_image_and_masks(image_fn)
 
-    def _get_image_and_masks(self, image_fn: str) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_image_and_masks(self, image_fn: str) -> tuple[np.ndarray, np.ndarray]:
         """
         Get the image and mask for a given image name.
 
@@ -107,30 +109,39 @@ class AIMLoader(BaseFileLoader):
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             First element: the density image as a numpy array of shape (1,D,H,W)
             Second element: the masks as a numpy array of shape (3,D,H,W).
             Mask order is cortical, trabecular, background
         """
-        cort_mask_fn = image_fn.replace('.AIM', '_CORT_MASK.AIM')
-        trab_mask_fn = image_fn.replace('.AIM', '_TRAB_MASK.AIM')
-        image, image_pos = self._get_image_data_and_position(image_fn, ImageType.DENSITY)
-        cort_mask, cort_mask_pos = self._get_image_data_and_position(cort_mask_fn, ImageType.MASK)
-        trab_mask, trab_mask_pos = self._get_image_data_and_position(trab_mask_fn, ImageType.MASK)
-        image, cort_mask, trab_mask = tuple(self._align_aims([
-            (image, image_pos, "edge"),
-            (cort_mask, cort_mask_pos, "constant"),
-            (trab_mask, trab_mask_pos, "constant")
-        ]))
+        cort_mask_fn = image_fn.replace(".AIM", "_CORT_MASK.AIM")
+        trab_mask_fn = image_fn.replace(".AIM", "_TRAB_MASK.AIM")
+        image, image_pos = self._get_image_data_and_position(
+            image_fn, ImageType.DENSITY
+        )
+        cort_mask, cort_mask_pos = self._get_image_data_and_position(
+            cort_mask_fn, ImageType.MASK
+        )
+        trab_mask, trab_mask_pos = self._get_image_data_and_position(
+            trab_mask_fn, ImageType.MASK
+        )
+        image, cort_mask, trab_mask = tuple(
+            self._align_aims(
+                [
+                    (image, image_pos, "edge"),
+                    (cort_mask, cort_mask_pos, "constant"),
+                    (trab_mask, trab_mask_pos, "constant"),
+                ]
+            )
+        )
         back_mask = np.logical_and(np.logical_not(cort_mask), np.logical_not(trab_mask))
         image = np.expand_dims(image, 0)
         masks = np.stack([cort_mask, trab_mask, back_mask])
         return image, masks
 
-    def _get_image_data_and_position(self,
-                                     fn: str,
-                                     image_type: ImageType
-                                     ) -> Tuple[np.ndarray, List[int]]:
+    def _get_image_data_and_position(
+        self, fn: str, image_type: ImageType
+    ) -> tuple[np.ndarray, list[int]]:
         """
         Extract the image data and position vector from an AIM file.
 
@@ -145,7 +156,7 @@ class AIMLoader(BaseFileLoader):
 
         Returns
         -------
-        Tuple[np.ndarray, List[int]]
+        tuple[np.ndarray, list[int]]
             First element: the image as a numpy array
             Second element: a length 3 list of integers that describes the positional offset (in voxels) of the image
             relative to a shared origin.
@@ -163,27 +174,31 @@ class AIMLoader(BaseFileLoader):
         return data, position
 
     @staticmethod
-    def _align_aims(data: List[Tuple[np.ndarray, List[int], str]]) -> List[np.ndarray]:
+    def _align_aims(data: list[tuple[np.ndarray, list[int], str]]) -> list[np.ndarray]:
         """
         A static method that takes a set of images/masks and their positions and aligns them.
 
         Parameters
         ----------
-        data : List[Tuple[np.ndarray, List[int], str]]
+        data : list[tuple[np.ndarray, list[int], str]]
             A list of tuples, where each tuple contains an image/mask numpy array, a length-3 list of integers
             describing its positional offset (in voxels) from a shared origin, and the pad mode ('constant' or 'edge')
 
         Returns
         -------
-        List[np.ndarray]
+        list[np.ndarray]
             A list of aligned images, with the same shape, in the same order as given to the `data` arg
 
         """
         min_position = np.asarray([p for _, p, _ in data]).min(axis=0)
         pad_lower = [p - min_position for _, p, _ in data]
-        max_shape = np.asarray([(aim.shape + pl) for (aim, _, _), pl in zip(data, pad_lower)]).max(axis=0)
-        pad_upper = [(max_shape - (aim.shape + pl)) for (aim, _, _), pl in zip(data, pad_lower)]
+        max_shape = np.asarray(
+            [(aim.shape + pl) for (aim, _, _), pl in zip(data, pad_lower)]
+        ).max(axis=0)
+        pad_upper = [
+            (max_shape - (aim.shape + pl)) for (aim, _, _), pl in zip(data, pad_lower)
+        ]
         return [
-            np.pad(aim, tuple([(l, u) for l, u in zip(pl, pu)]), m)
-            for (aim, _, m), pl, pu in zip(data, pad_lower, pad_upper)
+            np.pad(aim, tuple([(pl, pu) for pl, pu in zip(plow, pupp)]), m)
+            for (aim, _, m), plow, pupp in zip(data, pad_lower, pad_upper)
         ]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+from collections.abc import Iterable
 
 from blpytorchlightning.dataset_components.PatchSampler import PatchSampler
 
@@ -9,7 +10,13 @@ class SlicePatchSampler(PatchSampler):
     """
     Class to sample a 2D slice from a 3D image and masks.
     """
-    def __init__(self, patch_width=128, dims: Union[Set[int], List[int], Tuple[int]] = (0, 1, 2), foreground_channel=0):
+
+    def __init__(
+        self,
+        patch_width: int = 128,
+        dims: Iterable = (0, 1, 2),
+        foreground_channel: int = 0,
+    ):
         super().__init__(patch_width, foreground_channel)
         try:
             self._dims = set(map(lambda x: int(x), dims))
@@ -18,10 +25,12 @@ class SlicePatchSampler(PatchSampler):
                 f"`dim` arg accepts only iterables containing values that are ints or can be cast to ints...\n{e}`"
             )
         if max(self._dims) > 2 or min(self._dims) < 0:
-            raise ValueError("`dims` must contain only values between 0 and 2, inclusive")
+            raise ValueError(
+                "`dims` must contain only values between 0 and 2, inclusive"
+            )
 
     @property
-    def dims(self) -> Set[int]:
+    def dims(self) -> set[int]:
         """
         Getter method for the `dims` property.
 
@@ -31,24 +40,28 @@ class SlicePatchSampler(PatchSampler):
         """
         return self._dims
 
-    def __call__(self, sample: Tuple[np.ndarray, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(
+        self, sample: tuple[np.ndarray, np.ndarray]
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Pass the sample through this, extracting a slice patch
 
         Parameters
         ----------
-        sample: Tuple[np.ndarray, np.ndarray]
+        sample: tuple[np.ndarray, np.ndarray]
             The full 3D input sample.
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             The 2D slice patch sample.
         """
         sample = self._get_random_slice(*sample)
         return self._crop_to_foreground(*sample)
 
-    def _get_random_slice(self, image: np.ndarray, masks: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_random_slice(
+        self, image: np.ndarray, masks: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Get a random slice in a random dim from the image and mask
 
@@ -62,7 +75,7 @@ class SlicePatchSampler(PatchSampler):
 
         Returns
         -------
-        Tuple[np.ndarray, np.ndarray]
+        tuple[np.ndarray, np.ndarray]
             The slice sample.
         """
         slicing_dim = np.random.choice(list(self._dims)) + 1

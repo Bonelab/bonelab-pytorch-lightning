@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import numpy as np
 import os
 import pickle
+import torch
 import yaml
-
 from torch.utils.data import Dataset
+from typing import Optional, Union
+
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseFileLoader
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseSampler
+from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseTransformer
 
 
 class HRpQCTDataset(Dataset):
@@ -14,11 +20,12 @@ class HRpQCTDataset(Dataset):
     required methods to serve as a Dataset given to a Dataloader during model training.
     """
 
-    def __init__(self,
-                 file_loader: BaseFileLoader,
-                 sampler: BaseSampler,
-                 transformer: Optional[BaseTransformer] = None
-                 ) -> None:
+    def __init__(
+        self,
+        file_loader: BaseFileLoader,
+        sampler: BaseSampler,
+        transformer: Optional[BaseTransformer] = None,
+    ) -> None:
         """
         Initialization method.
 
@@ -53,7 +60,9 @@ class HRpQCTDataset(Dataset):
         """
         return len(self.file_loader)
 
-    def __getitem__(self, idx: int) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[torch.Tensor, torch.Tensor]]:
+    def __getitem__(
+        self, idx: int
+    ) -> Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]:
         """
         A magic method to return a sample. Samples are tuples where the first element is the input and the
         second element is the target. Necessary to function as an iterator.
@@ -64,7 +73,7 @@ class HRpQCTDataset(Dataset):
 
         Returns
         -------
-        Union[Tuple[np.ndarray, np.ndarray], Tuple[torch.Tensor, torch.Tensor]]
+        Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]
             A sample, consisting of an input and target pair.
         """
         sample = self.sampler(self.file_loader[idx])
@@ -72,7 +81,9 @@ class HRpQCTDataset(Dataset):
             sample = self.transformer(sample)
         return sample
 
-    def pickle_dataset(self, folder: str, idxs: List[int], num_epochs: int, args: Optional[dict] = None) -> None:
+    def pickle_dataset(
+        self, folder: str, idxs: list[int], num_epochs: int, args: Optional[dict] = None
+    ) -> None:
         """
         Pickle samples from a dataset and save to file to be consumed later.
 
@@ -81,7 +92,7 @@ class HRpQCTDataset(Dataset):
         folder : str
             The directory to save the pickled samples to.
 
-        idxs : List[int]
+        idxs : list[int]
             The sample indices to pickle.
 
         num_epochs : int
@@ -97,14 +108,14 @@ class HRpQCTDataset(Dataset):
         except FileExistsError:
             pass
         if args:
-            with open(os.path.join(args.pickle_dir, 'hparams.yaml'), 'w') as f:
+            with open(os.path.join(args.pickle_dir, "hparams.yaml"), "w") as f:
                 yaml.dump(args.__dict__, f)
         for idx in idxs:
-            subfolder = f'{idx:d}'
+            subfolder = f"{idx:d}"
             if not os.path.isdir(os.path.join(folder, subfolder)):
                 os.mkdir(os.path.join(folder, subfolder))
             for e in range(num_epochs):
                 sample = self[idx]
-                sample_fn = os.path.join(folder, subfolder, f'epoch_{e:d}.pickle')
-                with open(sample_fn, 'wb') as f:
+                sample_fn = os.path.join(folder, subfolder, f"epoch_{e:d}.pickle")
+                with open(sample_fn, "wb") as f:
                     pickle.dump(sample, f, protocol=pickle.HIGHEST_PROTOCOL)

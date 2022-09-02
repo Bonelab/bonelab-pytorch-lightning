@@ -17,15 +17,16 @@ class Layer3D(nn.Module):
     https://github.com/keras-team/keras/issues/1802#issuecomment-187966878
     """
 
-    def __init__(self,
-                 inputs: int,
-                 outputs: int,
-                 kernel_size: int,
-                 padding: int,
-                 stride: int,
-                 groups: int,
-                 dropout: float
-                 ) -> None:
+    def __init__(
+        self,
+        inputs: int,
+        outputs: int,
+        kernel_size: int,
+        padding: int,
+        stride: int,
+        groups: int,
+        dropout: float,
+    ) -> None:
         """
         Initialization method for the Layer2D class.
 
@@ -55,14 +56,22 @@ class Layer3D(nn.Module):
         """
         super().__init__()
         self.layer = nn.Sequential(
-            nn.Conv3d(inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            nn.Conv3d(
+                inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride
+            ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
             nn.Dropout3d(dropout),
-            nn.Conv3d(outputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            nn.Conv3d(
+                outputs,
+                outputs,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+            ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
-            nn.Dropout3d(dropout)
+            nn.Dropout3d(dropout),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -87,13 +96,14 @@ class Synthesis3D(nn.Module):
     Synthesis3D - Takes several stacked 2D segmentations as input, returns a final 3D segmentation as output.
     """
 
-    def __init__(self,
-                 input_channels: int,
-                 output_classes: int,
-                 num_filters: List[int],
-                 channels_per_group: int,
-                 dropout: float
-                 ) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        output_classes: int,
+        num_filters: list[int],
+        channels_per_group: int,
+        dropout: float,
+    ) -> None:
         """
         The initialization function
 
@@ -105,7 +115,7 @@ class Synthesis3D(nn.Module):
         output_classes : int
             The number of classes (or embedding fields) you want the UNet to predict.
 
-        num_filters : List[int]
+        num_filters : list[int]
             A list of integers, where the length of the list determines how many layers will be in the UNet, and the
             integer value of each element of the list determines how many filters will be in the `Layer3D` object
             at that level of the UNet. The first element corresponds to the layers closest to the inputs and outputs,
@@ -130,22 +140,24 @@ class Synthesis3D(nn.Module):
         for f in num_filters:
             self.layers.append(
                 Layer3D(
-                    f_prev, f,
-                    self.layer_kernel_size, self.layer_padding, self.layer_stride,
-                    num_filters[0] // channels_per_group, dropout
+                    f_prev,
+                    f,
+                    self.layer_kernel_size,
+                    self.layer_padding,
+                    self.layer_stride,
+                    num_filters[0] // channels_per_group,
+                    dropout,
                 )
             )
             f_prev = f
 
         if len(self.layers) > 0:
             self.map_to_output = nn.Conv3d(
-                num_filters[-1], output_classes,
-                kernel_size=1, stride=1
+                num_filters[-1], output_classes, kernel_size=1, stride=1
             )
         else:
             self.map_to_output = nn.Conv3d(
-                self.num_inputs, output_classes,
-                kernel_size=1, stride=1
+                self.num_inputs, output_classes, kernel_size=1, stride=1
             )
 
     def forward(self, x):

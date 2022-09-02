@@ -26,7 +26,7 @@ class TestUNet2D(unittest.TestCase):
         unet_spec = {
             "input_channels": 1,
             "output_classes": 3,
-            "num_filters": [16,32],
+            "num_filters": [16, 32],
             "channels_per_group": 4,
             "dropout": 0.3
         }

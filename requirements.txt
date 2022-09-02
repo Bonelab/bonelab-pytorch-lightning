@@ -1,7 +1,3 @@
 setuptools
 numpy
-vtkbone
-bonelab
-yaml
 pyyaml
-pytorch

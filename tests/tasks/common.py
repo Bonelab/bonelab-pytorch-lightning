@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import torch
+from typing import Callable
 
 from blpytorchlightning.models.UNet2D import UNet2D
 

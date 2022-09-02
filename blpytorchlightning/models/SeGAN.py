@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import torch
 import torch.nn as nn
-from torch.nn import ModuleList
 
 
 class EncoderLayer(nn.Module):
@@ -20,15 +19,16 @@ class EncoderLayer(nn.Module):
     The repeating unit of the encoder.
     """
 
-    def __init__(self,
-                 inputs: int,
-                 outputs: int,
-                 kernel_size: int,
-                 padding: int,
-                 stride: int,
-                 groups: int,
-                 is_3d: bool = False
-                 ) -> None:
+    def __init__(
+        self,
+        inputs: int,
+        outputs: int,
+        kernel_size: int,
+        padding: int,
+        stride: int,
+        groups: int,
+        is_3d: bool = False,
+    ) -> None:
         """
         Initialization method.
 
@@ -60,9 +60,11 @@ class EncoderLayer(nn.Module):
         conv = nn.Conv3d if is_3d else nn.Conv2d
 
         self.layer = nn.Sequential(
-            conv(inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            conv(
+                inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride
+            ),
             nn.GroupNorm(groups, outputs),
-            nn.LeakyReLU(inplace=True)
+            nn.LeakyReLU(inplace=True),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -86,17 +88,18 @@ class DecoderLayer(nn.Module):
     The repeating unit of the decoder.
     """
 
-    def __init__(self,
-                 inputs: int,
-                 outputs: int,
-                 kernel_size: int,
-                 padding: int,
-                 stride: int,
-                 groups: int,
-                 scale_factor: int,
-                 scale_mode: str = "bilinear",
-                 is_3d: bool = False
-                 ) -> None:
+    def __init__(
+        self,
+        inputs: int,
+        outputs: int,
+        kernel_size: int,
+        padding: int,
+        stride: int,
+        groups: int,
+        scale_factor: int,
+        scale_mode: str = "bilinear",
+        is_3d: bool = False,
+    ) -> None:
         """
         Initialization method.
 
@@ -135,10 +138,14 @@ class DecoderLayer(nn.Module):
         conv = nn.Conv3d if is_3d else nn.Conv2d
 
         self.layer = nn.Sequential(
-            nn.Upsample(scale_factor=scale_factor, mode=scale_mode, align_corners=False),
-            conv(inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            nn.Upsample(
+                scale_factor=scale_factor, mode=scale_mode, align_corners=False
+            ),
+            conv(
+                inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride
+            ),
             nn.GroupNorm(groups, outputs),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -162,14 +169,15 @@ class Segmentor(nn.Module):
     Generates a segmentation from an image.
     """
 
-    def __init__(self,
-                 input_channels: int,
-                 output_classes: int,
-                 num_filters: List[int],
-                 channels_per_group: int,
-                 upsample_mode: str = "bilinear",
-                 is_3d: bool = False
-                 ) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        output_classes: int,
+        num_filters: list[int],
+        channels_per_group: int,
+        upsample_mode: str = "bilinear",
+        is_3d: bool = False,
+    ) -> None:
         """
         The initialization function
 
@@ -181,7 +189,7 @@ class Segmentor(nn.Module):
         output_classes : int
             The number of classes (or embedding fields) you want the Segmentor to predict.
 
-        num_filters : List[int]
+        num_filters : list[int]
             A list of integers, where the length of the list determines how many layers will be in the UNet, and the
             integer value of each element of the list determines how many filters will be in the `Layer2D` object
             at that level of the UNet. The first element corresponds to the layers closest to the inputs and outputs,
@@ -217,34 +225,34 @@ class Segmentor(nn.Module):
                 encoder_padding,
                 encoder_stride,
                 num_filters[0] // channels_per_group,
-                is_3d
+                is_3d,
             )
         )
         for fi in range(1, len(num_filters)):
             self.encoder.append(
                 EncoderLayer(
-                    num_filters[fi-1],
+                    num_filters[fi - 1],
                     num_filters[fi],
                     encoder_kernel_size,
                     encoder_padding,
                     encoder_stride,
                     num_filters[fi] // channels_per_group,
-                    is_3d
+                    is_3d,
                 )
             )
         self.decoder = nn.ModuleList()
-        for fi in range(1, len(num_filters)-1):
+        for fi in range(1, len(num_filters) - 1):
             self.decoder.append(
                 DecoderLayer(
-                    2*num_filters[fi],
-                    num_filters[fi-1],
+                    2 * num_filters[fi],
+                    num_filters[fi - 1],
                     decoder_kernel_size,
                     decoder_padding,
                     decoder_stride,
-                    num_filters[fi-1] // channels_per_group,
+                    num_filters[fi - 1] // channels_per_group,
                     decoder_resize_factor,
                     upsample_mode,
-                    is_3d
+                    is_3d,
                 )
             )
         self.decoder.append(
@@ -257,22 +265,26 @@ class Segmentor(nn.Module):
                 num_filters[-2] // channels_per_group,
                 decoder_resize_factor,
                 upsample_mode,
-                is_3d
+                is_3d,
             )
         )
 
         conv = nn.Conv3d if is_3d else nn.Conv2d
 
         self.map_to_output = nn.Sequential(
-            nn.Upsample(scale_factor=decoder_resize_factor, mode=upsample_mode, align_corners=False),
+            nn.Upsample(
+                scale_factor=decoder_resize_factor,
+                mode=upsample_mode,
+                align_corners=False,
+            ),
             conv(
-                2*num_filters[0],
+                2 * num_filters[0],
                 output_classes,
                 kernel_size=decoder_kernel_size,
                 padding=decoder_padding,
-                stride=decoder_stride
+                stride=decoder_stride,
             ),
-            nn.Softmax(dim=1)
+            nn.Softmax(dim=1),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -306,12 +318,13 @@ class Discriminator(nn.Module):
     segmentations and those generated by the segmentor.
     """
 
-    def __init__(self,
-                 input_channels: int,
-                 num_filters: List[int],
-                 channels_per_group: int,
-                 is_3d: bool = False
-                 ) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        num_filters: list[int],
+        channels_per_group: int,
+        is_3d: bool = False,
+    ) -> None:
         """
         The initialization function
 
@@ -320,7 +333,7 @@ class Discriminator(nn.Module):
         input_channels : int
             The number of channels in the expected input image.
 
-        num_filters : List[int]
+        num_filters : list[int]
             A list of integers, where the length of the list determines how many layers will be in the UNet, and the
             integer value of each element of the list determines how many filters will be in the `Layer2D` object
             at that level of the UNet. The first element corresponds to the layers closest to the inputs and outputs,
@@ -347,7 +360,7 @@ class Discriminator(nn.Module):
                 encoder_padding,
                 encoder_stride,
                 num_filters[0] // channels_per_group,
-                is_3d
+                is_3d,
             )
         )
         for fi in range(1, len(num_filters)):
@@ -359,11 +372,11 @@ class Discriminator(nn.Module):
                     encoder_padding,
                     encoder_stride,
                     num_filters[fi] // channels_per_group,
-                    is_3d
+                    is_3d,
                 )
             )
 
-    def forward(self, x: torch.Tensor) -> List[torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> list[torch.Tensor]:
         """
         Forward pass method.
 
@@ -374,7 +387,7 @@ class Discriminator(nn.Module):
 
         Returns
         -------
-        List[torch.Tensor]
+        list[torch.Tensor]
             List of features maps, one for each scale in the encoder.
         """
         features = [self.encoder[0](x)]
@@ -387,11 +400,11 @@ class Discriminator(nn.Module):
 def get_segmentor_and_discriminators(
     input_channels: int,
     output_classes: int,
-    num_filters: List[int],
+    num_filters: list[int],
     channels_per_group: int,
     upsample_mode: str = "bilinear",
-    is_3d: bool = False
-) -> Tuple[Segmentor, List[Discriminator]]:
+    is_3d: bool = False,
+) -> tuple[Segmentor, list[Discriminator]]:
     """
     Convenience function to quickly get segmentor and discriminators for a S<n>-<n>C SeGAN, where
     n is the number of output classes.
@@ -404,7 +417,7 @@ def get_segmentor_and_discriminators(
     output_classes : int
         The number of classes (or embedding fields) you want the Segmentor to predict.
 
-    num_filters : List[int]
+    num_filters : list[int]
         A list of integers, where the length of the list determines how many layers will be in the UNet, and the
         integer value of each element of the list determines how many filters will be in the `Layer2D` object
         at that level of the UNet. The first element corresponds to the layers closest to the inputs and outputs,
@@ -423,19 +436,22 @@ def get_segmentor_and_discriminators(
 
     Returns
     -------
-    Tuple[Segmentor, List[Discriminator]]
+    tuple[Segmentor, list[Discriminator]]
         The segmentor and discriminator models for the S<n>-<n>C SeGAN.
     """
-    
+
     segmentor = Segmentor(
-        input_channels, output_classes, 
-        num_filters, channels_per_group, 
-        upsample_mode, is_3d
+        input_channels,
+        output_classes,
+        num_filters,
+        channels_per_group,
+        upsample_mode,
+        is_3d,
     )
-    
+
     discriminators = [
         Discriminator(input_channels, num_filters, channels_per_group, is_3d)
         for _ in range(output_classes)
     ]
-    
+
     return segmentor, discriminators

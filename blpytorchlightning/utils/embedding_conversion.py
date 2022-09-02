@@ -3,9 +3,12 @@ from __future__ import annotations
 import numpy as np
 import torch
 import torch.nn as nn
+from typing import Callable
 
 
-def create_approximate_heaviside(epsilon: float) -> Callable[[torch.Tensor], torch.Tensor]:
+def create_approximate_heaviside(
+    epsilon: float,
+) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Factory function for the approximate heaviside function.
 
@@ -22,6 +25,7 @@ def create_approximate_heaviside(epsilon: float) -> Callable[[torch.Tensor], tor
         that correspond to how likely it is that a voxel is inside the embedded surface.
 
     """
+
     def approximate_heaviside(x: torch.Tensor) -> torch.Tensor:
         """
         A function that transforms Tensors from level-set embedding fields to scalar fields on the open interval (0,1)
@@ -43,7 +47,9 @@ def create_approximate_heaviside(epsilon: float) -> Callable[[torch.Tensor], tor
     return approximate_heaviside
 
 
-def create_convert_embeddings_to_predictions(epsilon: float) -> Callable[[torch.Tensor],torch.Tensor]:
+def create_convert_embeddings_to_predictions(
+    epsilon: float,
+) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Factory function for the embedding to predictions conversion function.
 

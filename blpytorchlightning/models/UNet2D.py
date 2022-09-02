@@ -21,15 +21,16 @@ class Layer2D(nn.Module):
     https://github.com/keras-team/keras/issues/1802#issuecomment-187966878
     """
 
-    def __init__(self,
-                 inputs: int,
-                 outputs: int,
-                 kernel_size: int,
-                 padding: int,
-                 stride: int,
-                 groups: int,
-                 dropout: float
-                 ) -> None:
+    def __init__(
+        self,
+        inputs: int,
+        outputs: int,
+        kernel_size: int,
+        padding: int,
+        stride: int,
+        groups: int,
+        dropout: float,
+    ) -> None:
         """
         Initialization method for the Layer2D class.
 
@@ -59,14 +60,22 @@ class Layer2D(nn.Module):
         """
         super().__init__()
         self.layer = nn.Sequential(
-            nn.Conv2d(inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            nn.Conv2d(
+                inputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride
+            ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
             nn.Dropout2d(dropout),
-            nn.Conv2d(outputs, outputs, kernel_size=kernel_size, padding=padding, stride=stride),
+            nn.Conv2d(
+                outputs,
+                outputs,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+            ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
-            nn.Dropout2d(dropout)
+            nn.Dropout2d(dropout),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -91,14 +100,15 @@ class UNet2D(nn.Module):
     UNet2D - Takes an image as input, returns a segmentation (or level-set embedding of segmentation) as output.
     """
 
-    def __init__(self,
-                 input_channels: int,
-                 output_classes: int,
-                 num_filters: List[int],
-                 channels_per_group: int,
-                 dropout: float,
-                 upsample_mode: str = "bilinear"
-                 ) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        output_classes: int,
+        num_filters: list[int],
+        channels_per_group: int,
+        dropout: float,
+        upsample_mode: str = "bilinear",
+    ) -> None:
         """
         The initialization function
 
@@ -110,7 +120,7 @@ class UNet2D(nn.Module):
         output_classes : int
             The number of classes (or embedding fields) you want the UNet to predict.
 
-        num_filters : List[int]
+        num_filters : list[int]
             A list of integers, where the length of the list determines how many layers will be in the UNet, and the
             integer value of each element of the list determines how many filters will be in the `Layer2D` object
             at that level of the UNet. The first element corresponds to the layers closest to the inputs and outputs,
@@ -145,36 +155,44 @@ class UNet2D(nn.Module):
         self.up = nn.ModuleList()
         self.layer_down.append(
             Layer2D(
-                input_channels, num_filters[0],
-                self.layer_kernel_size, self.layer_padding, self.layer_stride,
-                num_filters[0] // self.channels_per_group, self.dropout
+                input_channels,
+                num_filters[0],
+                self.layer_kernel_size,
+                self.layer_padding,
+                self.layer_stride,
+                num_filters[0] // self.channels_per_group,
+                self.dropout,
             )
         )
         for fi in range(1, len(num_filters)):
             self.down.append(nn.MaxPool2d(self.scale_factor))
             self.layer_down.append(
                 Layer2D(
-                    num_filters[fi - 1], num_filters[fi],
-                    self.layer_kernel_size, self.layer_padding, self.layer_stride,
-                    num_filters[fi] // self.channels_per_group, self.dropout
+                    num_filters[fi - 1],
+                    num_filters[fi],
+                    self.layer_kernel_size,
+                    self.layer_padding,
+                    self.layer_stride,
+                    num_filters[fi] // self.channels_per_group,
+                    self.dropout,
                 )
             )
             self.up.append(
-                nn.Upsample(
-                    scale_factor=self.scale_factor,
-                    mode=self.upsample_mode
-                )
+                nn.Upsample(scale_factor=self.scale_factor, mode=self.upsample_mode)
             )
             self.layer_up.append(
                 Layer2D(
-                    2 * num_filters[fi - 1], num_filters[fi - 1],
-                    self.layer_kernel_size, self.layer_padding, self.layer_stride,
-                    num_filters[fi - 1] // self.channels_per_group, self.dropout
+                    2 * num_filters[fi - 1],
+                    num_filters[fi - 1],
+                    self.layer_kernel_size,
+                    self.layer_padding,
+                    self.layer_stride,
+                    num_filters[fi - 1] // self.channels_per_group,
+                    self.dropout,
                 )
             )
         self.map_to_output = nn.Conv2d(
-            num_filters[0], output_classes,
-            kernel_size=1, stride=1
+            num_filters[0], output_classes, kernel_size=1, stride=1
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

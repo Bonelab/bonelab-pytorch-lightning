@@ -26,7 +26,7 @@ class TestSynthesis3D(unittest.TestCase):
         synthesis_spec = {
             "input_channels": 1,
             "output_classes": 3,
-            "num_filters": [16,32],
+            "num_filters": [16, 32],
             "channels_per_group": 4,
             "dropout": 0.3
         }

@@ -3,6 +3,8 @@ from __future__ import annotations
 import torch
 import pytorch_lightning as ptl
 from torch.optim import AdamW
+from typing import Optional, Callable
+
 from blpytorchlightning.utils.error_metrics import dice_similarity_coefficient
 
 
@@ -17,11 +19,12 @@ class SegmentationTask(ptl.LightningModule):
     Child tasks can inherit from this one and define their own `_basic_step` and `forward` methods.
     """
 
-    def __init__(self,
-                 model: torch.nn.Module,
-                 loss_function: Callable[[torch.Tensor], torch.Tensor],
-                 learning_rate: float
-                 ) -> None:
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        loss_function: Callable[[torch.Tensor], torch.Tensor],
+        learning_rate: float,
+    ) -> None:
         """
         Initialization method.
 
@@ -42,13 +45,15 @@ class SegmentationTask(ptl.LightningModule):
         self.loss_function = loss_function
         self.learning_rate = learning_rate
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
+    def training_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         """
         Training step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a training step.
 
         batch_idx : int
@@ -61,16 +66,18 @@ class SegmentationTask(ptl.LightningModule):
             The loss value from the training step, with the graph attached for backprop.
 
         """
-        loss, _ = self._basic_step(batch, batch_idx, 'train')
+        loss, _ = self._basic_step(batch, batch_idx, "train")
         return loss
 
-    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> Dict[torch.Tensor]:
+    def validation_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> dict[torch.Tensor]:
         """
         Validation step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a validation step.
 
         batch_idx : int
@@ -79,19 +86,21 @@ class SegmentationTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[torch.Tensor]
+        dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        _, metrics = self._basic_step(batch, batch_idx, 'val')
+        _, metrics = self._basic_step(batch, batch_idx, "val")
         return metrics
 
-    def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> Dict[torch.Tensor]:
+    def test_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> dict[torch.Tensor]:
         """
         Testing step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -100,22 +109,21 @@ class SegmentationTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[torch.Tensor]
+        dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        _, metrics = self._basic_step(batch, batch_idx, 'test')
+        _, metrics = self._basic_step(batch, batch_idx, "test")
         return metrics
 
-    def predict_step(self,
-                     batch: Tuple[torch.Tensor, torch.Tensor],
-                     batch_idx: int
-                     ) -> torch.Tensor:
+    def predict_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         """
         Prediction step method.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -156,18 +164,16 @@ class SegmentationTask(ptl.LightningModule):
         """
         return AdamW(self.model.parameters(), lr=self.learning_rate)
 
-    def _basic_step(self,
-                    batch: Tuple[torch.Tensor, torch.Tensor],
-                    batch_idx: int,
-                    stage: str
-                    ) -> Tuple[torch.Tensor, Optional[Dict[Torch.Tensor]]]:
+    def _basic_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
+    ) -> tuple[torch.Tensor, Optional[dict[torch.Tensor]]]:
         """
         The basic segmentation step method used by all the other step methods.
         Segments an image, returns loss and metrics.
 
         Parameters
         ----------
-        batch : Tuple[torch.Tensor, torch.Tensor]
+        batch : tuple[torch.Tensor, torch.Tensor]
             A tuple containing the inputs and targets for a test step.
 
         batch_idx : int
@@ -180,23 +186,24 @@ class SegmentationTask(ptl.LightningModule):
 
         Returns
         -------
-        Tuple[torch.Tensor, Optional[Dict[Torch.Tensor]]]
+        tuple[torch.Tensor, Optional[dict[torch.Tensor]]]
             The first element of the tuple is the loss value with the graph attached for backprop. The second
             element of the tuple is the metrics dictionary.
         """
         x, y = batch
         y_hat = self.model(x)
         loss = self.loss_function(y_hat, y)
-        metrics = {f'{stage}_loss': loss.detach(), **self._get_dsc_metrics(y_het, y, stage)}
+        metrics = {
+            f"{stage}_loss": loss.detach(),
+            **self._get_dsc_metrics(y_hat, y, stage),
+        }
         self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
         return loss, metrics
 
     @staticmethod
     def _get_dsc_metrics(
-        y_hat: torch.Tensor,
-        y: torch.Tensor,
-        stage: str
-    ) -> Dict[Torch.Tensor]:
+        y_hat: torch.Tensor, y: torch.Tensor, stage: str
+    ) -> dict[torch.Tensor]:
         """
         Static method for adding the dice similarity coefficient to the metrics dictionary.
 
@@ -214,12 +221,13 @@ class SegmentationTask(ptl.LightningModule):
 
         Returns
         -------
-        Dict[Torch.Tensor]
+        dict[torch.Tensor]
             A dictionary with the dice similarity coefficient values for each class in the segmentation.
         """
         num_classes = y_hat.shape[1]
         y_hat = torch.argmax(y_hat, dim=1)
+        metrics = {}
         for c in range(num_classes):
             dsc = dice_similarity_coefficient(y == c, y_hat == c)
-            metrics[f'{stage}_dsc_{c}'] = dsc
+            metrics[f"{stage}_dsc_{c}"] = dsc
         return metrics

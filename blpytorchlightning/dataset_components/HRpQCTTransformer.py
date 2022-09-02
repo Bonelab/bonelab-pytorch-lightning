@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import BaseTransformer
+from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+    BaseTransformer,
+)
 
 
 class HRpQCTTransformer(BaseTransformer):
@@ -14,13 +16,15 @@ class HRpQCTTransformer(BaseTransformer):
     2. Convert the rescaled image and masks to torch tensors.
     """
 
-    def __init__(self, intensity_bounds: Tuple[float, float] = (-400, 1400), ohe: bool = False) -> None:
+    def __init__(
+        self, intensity_bounds: tuple[float, float] = (-400, 1400), ohe: bool = False
+    ) -> None:
         """
         Initialization method
 
         Parameters
         ----------
-        intensity_bounds : Tuple[float, float]
+        intensity_bounds : tuple[float, float]
             The intensity bounds, in the same units of density as the image. Determine the linear mapping from the
             density space to the unitless [-1,1] interval for normalization. Default: [-400, 1400]
 
@@ -35,13 +39,13 @@ class HRpQCTTransformer(BaseTransformer):
         self._ohe = ohe
 
     @property
-    def intensity_bounds(self) -> Tuple[float, float]:
+    def intensity_bounds(self) -> tuple[float, float]:
         """
         `intensity_bounds` getter method.
 
         Returns
         -------
-        Tuple[float, float]
+        tuple[float, float]
         """
         return self._intensity_bounds
 
@@ -56,19 +60,21 @@ class HRpQCTTransformer(BaseTransformer):
         """
         return self._ohe
 
-    def __call__(self, sample: Tuple[np.ndarray, np.ndarray]) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __call__(
+        self, sample: tuple[np.ndarray, np.ndarray]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         A magic method that allows this function to be called as a function. Pass the sample through, rescale
         the image and convert everything to tensors.
 
         Parameters
         ----------
-        sample: Tuple[np.ndarray, np.ndarray]
+        sample: tuple[np.ndarray, np.ndarray]
             The input sample.
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             The transformed sample.
         """
         image, masks = sample
@@ -93,10 +99,14 @@ class HRpQCTTransformer(BaseTransformer):
         min_intensity = self._intensity_bounds[0]
         max_intensity = self._intensity_bounds[1]
         image = np.minimum(np.maximum(image, min_intensity), max_intensity)
-        image = (2 * image - max_intensity - min_intensity) / (max_intensity - min_intensity)
+        image = (2 * image - max_intensity - min_intensity) / (
+            max_intensity - min_intensity
+        )
         return image
 
-    def _image_and_mask_to_tensors(self, image: np.ndarray, masks: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _image_and_mask_to_tensors(
+        self, image: np.ndarray, masks: np.ndarray
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Convert the image and mask to torch tensors.
 
@@ -110,7 +120,7 @@ class HRpQCTTransformer(BaseTransformer):
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             First element is the input image, second element is the segmentation / masks.
         """
         image = np.ascontiguousarray(image, dtype=np.float32)

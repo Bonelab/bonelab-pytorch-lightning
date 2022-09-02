@@ -9,7 +9,7 @@ class TestSeGANTask(unittest.TestCase):
 
     def test_can_instantiate(self):
         learning_rate = 1e-4
-        task = SeGANTask(
+        _ = SeGANTask(
             get_torch_module(),
             [get_torch_module()],
             get_loss_function(),

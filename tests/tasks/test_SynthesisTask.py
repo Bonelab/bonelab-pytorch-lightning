@@ -2,7 +2,7 @@ import unittest
 
 from blpytorchlightning.tasks.SynthesisTask import SynthesisTask
 from blpytorchlightning.tasks.SegmentationTask import SegmentationTask
-from tests.tasks.common import get_loss_function, get_torch_module, get_embedding_conversion_function
+from tests.tasks.common import get_loss_function, get_torch_module
 
 
 class TestSynthesisTask(unittest.TestCase):
