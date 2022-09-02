@@ -33,11 +33,11 @@ pip install -e .
 ```commandline
 # from your main projects folder / wherever you keep your git repos...
 # ... with SSH authentication
-git clone git@github.com:Bonelab/Bonelab.git
+git clone https://github.com/Bonelab/bonelab-pytorch-lightning.git
 # ... or straight HTTPS
-git clone https://github.com/Bonelab/Bonelab.git
+git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
 # go into the repo
-cd Bonelab
+cd bonelab-pytorch-lightning
 # install in editable mode
 pip install -e .
 ```
