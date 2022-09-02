@@ -1,3 +1,5 @@
 setuptools
 numpy
 pyyaml
+flake8
+black
