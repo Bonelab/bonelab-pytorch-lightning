@@ -4,17 +4,26 @@ Tasks, dataset components, loss functions, and utilities for using pytorch light
 ---
 ## Setup
 
-### 1. Set up the recommended `blptl` conda environment:
-
-CPU:
+### 0. Clone this repo
 ```commandline
-conda create -n blptl -c numerics88 -c conda-forge pytorch torchvision pytorch-lightning torchmetrics scikit-learn numpy pandas scipy matplotlib n88tools vtk simpleitk scikit-image
+# from your main projects folder / wherever you keep your git repos...
+# ... with SSH authentication
+git clone https://github.com/Bonelab/bonelab-pytorch-lightning.git
+# ... or straight HTTPS
+git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
 ```
 
-GPU:
+### 1. Set up the recommended `blptl` conda environment using `environment.yaml`:
+
 ```commandline
-conda create -n blptl -c numerics88 -c conda-forge pytorch-gpu torchvision pytorch-lightning torchmetrics scikit-learn numpy pandas scipy matplotlib n88tools vtk simpleitk scikit-image
+cd bonelab-pytorch-lightning
+conda config --set channel_priority flexible
+conda env create -f environment.yaml
+conda activate blptl
 ```
+
+Different instructions may be needed on ARC to use GPUs. not sure yet, will update.
+
 ### 2. Download and install `bonelab`:
 
 ```commandline
@@ -29,24 +38,22 @@ cd Bonelab
 pip install -e .
 ```
 
-### 3. Download and install `blpytorchlightning`:
+### 3. Install `blpytorchlightning`:
 
 ```commandline
-# from your main projects folder / wherever you keep your git repos...
-# ... with SSH authentication
-git clone https://github.com/Bonelab/bonelab-pytorch-lightning.git
-# ... or straight HTTPS
-git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
 # go into the repo
 cd bonelab-pytorch-lightning
 # install in editable mode
 pip install -e .
 ```
 
-| Warning: When setting up an environment, you should install things with `conda` first and then `pip`. <br/>If you flip back and forth you'll end up breaking your environment eventually! |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Warning: When setting up an environment, you should install things with `conda` first and then `pip`.  <br/>If you flip back and forth you'll end up breaking your environment eventually! |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
-### 4. Create a separate project directory and easily write scripts for training models using the `blptl` environment!
+### 4. Use it!
+
+Create a separate project directory and easily write scripts for training models using the `blptl` environment!
+You can see some example scripts in https://github.com/Bonelab/hrpqct-knee-segmentation
 
 ---
 ## How to use
@@ -138,3 +145,7 @@ switch to your branch, and click the button that says "submit pull request."
 If the tests and style checks pass it can be merged.
 
 [Full explanation on GitHub Docs.](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+
+### 7. Segmentation models to be incorporated:
+
+UNETR: https://github.com/Project-MONAI/research-contributions/tree/main/UNETR/BTCV
