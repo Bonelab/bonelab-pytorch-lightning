@@ -73,8 +73,7 @@ class NIFTILoader(BaseFileLoader):
         -------
         tuple[np.ndarray, np.ndarray]
             First element: the image as a numpy array of shape (1,D,H,W)
-            Second element: the masks as a numpy array of shape (C,D,H,W).
-            Mask order is cortical, trabecular, background
+            Second element: the masks as a numpy array of shape (C,D,H,W)
         """
         image_fn = self._image_list[idx]
 
