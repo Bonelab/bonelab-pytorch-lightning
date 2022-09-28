@@ -22,7 +22,7 @@ conda env create -f environment.yaml
 conda activate blptl
 ```
 
-Different instructions may be needed on ARC to use GPUs. not sure yet, will update.
+This should work on MacOS and on linux (and on ARC).
 
 ### 2. Download and install `bonelab`:
 
