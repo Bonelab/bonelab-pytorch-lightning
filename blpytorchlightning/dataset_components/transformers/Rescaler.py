@@ -20,14 +20,15 @@ class Rescaler(BaseTransformer):
             The intensity bounds, in the same units of density as the image. Determine the linear mapping from the
             density space to the unitless [-1,1] interval for normalization.
         """
-        self._intensity_bounds = intensity_bounds
-        if not isinstance(self._intensity_bounds, tuple):
-            raise ValueError("intensity bounds must be tuple of floats or ints of length 2")
-        if not len(self._intensity_bounds) == 2:
-            raise ValueError("intensity bounds must be tuple of floats or ints of length 2")
-        for intensity in self._intensity_bounds:
-            if not isinstance(intensity, float) or isinstance(intensity, int):
-                raise ValueError("intensity bounds must be tuple of floats or ints of length 2")
+        try:
+            self._dims = tuple(map(lambda x: float(x), intensity_bounds))
+        except ValueError as e:
+            raise ValueError(
+                f"`intensity_bounds` arg accepts only iterables containing values that are floats or can be cast to "
+                f"floats...\n{e}"
+            )
+        if len(self._dims) != 2:
+            raise ValueError("`intensity_bounds` arg must be a length-2 iterable")
 
     @property
     def intensity_bounds(self) -> tuple[float, float]:

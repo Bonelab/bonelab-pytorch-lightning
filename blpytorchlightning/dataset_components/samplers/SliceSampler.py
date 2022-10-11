@@ -19,7 +19,7 @@ class SliceSampler(BaseSampler):
             self._dims = set(map(lambda x: int(x), dims))
         except ValueError as e:
             raise ValueError(
-                f"`dim` arg accepts only iterables containing values that are ints or can be cast to ints...\n{e}`"
+                f"`dim` arg accepts only iterables containing values that are ints or can be cast to ints...\n{e}"
             )
         if max(self._dims) > 2 or min(self._dims) < 0:
             raise ValueError(

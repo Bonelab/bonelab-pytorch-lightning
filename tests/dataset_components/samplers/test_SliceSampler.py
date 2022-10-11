@@ -1,13 +1,13 @@
 import unittest
 
-from blpytorchlightning.dataset_components.transformers.HRpQCTTransformer import HRpQCTTransformer
+from blpytorchlightning.dataset_components.samplers.SliceSampler import SliceSampler
 
 
-class TestHRpQCTTransformer(unittest.TestCase):
+class TestSliceSampler(unittest.TestCase):
     """ Test that we can import the module and work with the class. """
 
     def test_can_instantiate(self):
-        HRpQCTTransformer()
+        SliceSampler()
 
 
 if __name__ == '__main__':
