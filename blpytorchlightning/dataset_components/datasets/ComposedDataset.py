@@ -11,7 +11,7 @@ from typing import Optional, Union
 from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
     BaseFileLoader,
 )
-from blpytorchlightning.dataset_components.file_loaders.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
 from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )

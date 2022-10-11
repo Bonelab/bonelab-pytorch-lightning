@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.file_loaders.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
 
 
 class TestBaseSampler(unittest.TestCase):
