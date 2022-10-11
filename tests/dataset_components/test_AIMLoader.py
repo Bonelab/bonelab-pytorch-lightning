@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.AIMLoader import AIMLoader
+from blpytorchlightning.dataset_components.file_loaders.AIMLoader import AIMLoader
 
 
 class TestAIMLoader(unittest.TestCase):

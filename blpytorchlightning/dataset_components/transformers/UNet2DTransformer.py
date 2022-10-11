@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )
 

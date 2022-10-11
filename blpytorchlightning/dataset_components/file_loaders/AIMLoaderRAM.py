@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from blpytorchlightning.dataset_components.AIMLoader import AIMLoader
+from blpytorchlightning.dataset_components.file_loaders.AIMLoader import AIMLoader
 
 
 class AIMLoaderRAM(AIMLoader):

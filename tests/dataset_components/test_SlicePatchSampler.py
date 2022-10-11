@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.SlicePatchSampler import SlicePatchSampler
+from blpytorchlightning.dataset_components.samplers.SlicePatchSampler import SlicePatchSampler
 
 
 class TestSlicePatchSampler(unittest.TestCase):

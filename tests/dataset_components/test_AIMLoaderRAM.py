@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.AIMLoaderRAM import AIMLoaderRAM
+from blpytorchlightning.dataset_components.file_loaders.AIMLoaderRAM import AIMLoaderRAM
 
 
 class TestAIMLoaderRAM(unittest.TestCase):

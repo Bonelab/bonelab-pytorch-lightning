@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.HRpQCTTransformer import HRpQCTTransformer
+from blpytorchlightning.dataset_components.transformers.HRpQCTTransformer import HRpQCTTransformer
 
 
 class TestHRpQCTTransformer(unittest.TestCase):

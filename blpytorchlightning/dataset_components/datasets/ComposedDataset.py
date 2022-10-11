@@ -8,20 +8,21 @@ import yaml
 from torch.utils.data import Dataset
 from typing import Optional, Union
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
     BaseFileLoader,
 )
-from blpytorchlightning.dataset_components.base_classes.BaseSampler import BaseSampler
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+from blpytorchlightning.dataset_components.file_loaders.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )
 
 
-class HRpQCTDataset(Dataset):
+class ComposedDataset(Dataset):
     """
-    A Dataset class for HRpQCT images, constructed by composition.
+    A Dataset class for medical images, constructed by composition.
     Given a loader, sampler, and (optional) transform objects, it implements the
     required methods to serve as a Dataset given to a Dataloader during model training.
+    Also has additional method for pickling itself into pre-processed, training-ready samples.
     """
 
     def __init__(

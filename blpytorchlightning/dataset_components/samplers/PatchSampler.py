@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from blpytorchlightning.dataset_components.base_classes.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.file_loaders.BaseSampler import BaseSampler
 
 
 class PatchSampler(BaseSampler):

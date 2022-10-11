@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 from collections.abc import Iterable
 
-from blpytorchlightning.dataset_components.PatchSampler import PatchSampler
+from blpytorchlightning.dataset_components.samplers.PatchSampler import PatchSampler
 
 
 class SlicePatchSampler(PatchSampler):

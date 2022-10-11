@@ -1,8 +1,8 @@
 import unittest
 
-from blpytorchlightning.dataset_components.AIMLoader import AIMLoader
-from blpytorchlightning.dataset_components.PatchSampler import PatchSampler
-from blpytorchlightning.dataset_components.HRpQCTDataset import HRpQCTDataset
+from blpytorchlightning.dataset_components.file_loaders.AIMLoader import AIMLoader
+from blpytorchlightning.dataset_components.samplers.PatchSampler import PatchSampler
+from blpytorchlightning.dataset_components.datasets.ComposedDataset import HRpQCTDataset
 
 
 def get_file_loader():

@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.ComposedTransformers import ComposedTransformers
+from blpytorchlightning.dataset_components.transformers.ComposedTransformers import ComposedTransformers
 
 
 class TestComposedTransformers(unittest.TestCase):

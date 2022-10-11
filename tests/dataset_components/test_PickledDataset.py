@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.PickledDataset import PickledData, PickledDataset
+from blpytorchlightning.dataset_components.datasets.PickledDataset import PickledData, PickledDataset
 
 
 class TestPickledData(unittest.TestCase):

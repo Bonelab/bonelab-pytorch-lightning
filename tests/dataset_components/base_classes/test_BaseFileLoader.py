@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import BaseFileLoader
+from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import BaseFileLoader
 
 
 class TestBaseFileLoader(unittest.TestCase):
