@@ -8,7 +8,7 @@ from typing import Optional, Union
 
 from dataclasses import dataclass
 from torch.utils.data import Dataset
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )
 

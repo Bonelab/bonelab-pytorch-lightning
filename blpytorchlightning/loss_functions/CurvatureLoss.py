@@ -38,9 +38,9 @@ class CurvatureLoss(nn.Module):
         self.denominators = {
             "ddx": vox_width,
             "ddy": vox_width,
-            "d2dx2": vox_width ** 2,
-            "d2dy2": vox_width ** 2,
-            "d2dxdy": vox_width ** 2,
+            "d2dx2": vox_width**2,
+            "d2dy2": vox_width**2,
+            "d2dxdy": vox_width**2,
         }
 
     def forward(self, phi: torch.Tensor) -> torch.Tensor:

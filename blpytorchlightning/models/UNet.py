@@ -176,7 +176,9 @@ class UNet(nn.Module):
             )
         )
         for fi in range(1, len(num_filters)):
-            self.down.append(nn.MaxPool2d(self.scale_factor)) ## TODO can't use maxpool2d if it's 3d!!!
+            self.down.append(
+                nn.MaxPool2d(self.scale_factor)
+            )  # TODO can't use maxpool2d if it's 3d!!!
             self.layer_down.append(
                 Layer(
                     num_filters[fi - 1],
