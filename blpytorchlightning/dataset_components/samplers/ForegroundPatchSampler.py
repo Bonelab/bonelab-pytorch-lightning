@@ -6,8 +6,8 @@ from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampl
 
 
 class ForegroundPatchSampler(BaseSampler):
-    """ A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
-    certain class (or classes) in the masks that has/have been designated as the foreground. """
+    """A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
+    certain class (or classes) in the masks that has/have been designated as the foreground."""
 
     def __init__(self, patch_width: int = 128, foreground_channel: int = 0) -> None:
         """
@@ -103,5 +103,3 @@ class ForegroundPatchSampler(BaseSampler):
         for ps in patch_start:
             slicing_list.append(slice(ps, ps + self._patch_width))
         return image[tuple(slicing_list)], masks[tuple(slicing_list)]
-
-

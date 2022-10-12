@@ -8,7 +8,7 @@ from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
 
 
 class Rescaler(BaseTransformer):
-    """ A class to rescale the values in the input images from a given range to the range (-1,1). """
+    """A class to rescale the values in the input images from a given range to the range (-1,1)."""
 
     def __init__(self, intensity_bounds: tuple[float, float]) -> None:
         """
@@ -43,7 +43,7 @@ class Rescaler(BaseTransformer):
 
     def __call__(
         self, sample: tuple[np.ndarray, np.ndarray]
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         A magic method that allows this function to be called as a function. Pass the sample through, rescale
         the image and convert everything to tensors.

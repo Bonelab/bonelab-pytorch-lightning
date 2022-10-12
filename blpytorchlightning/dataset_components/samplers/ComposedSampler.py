@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import numpy as np
+
 from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
 
 
 class ComposedSampler(BaseSampler):
-    """ A class for composing multiple sampling objects together. """
+    """A class for composing multiple sampling objects together."""
 
     def __init__(self, samplers: list[BaseSampler]):
         """
@@ -18,7 +20,7 @@ class ComposedSampler(BaseSampler):
         self._samplers = samplers
 
     def __call__(
-            self, sample: tuple[np.ndarray, np.ndarray]
+        self, sample: tuple[np.ndarray, np.ndarray]
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         Function call magic method

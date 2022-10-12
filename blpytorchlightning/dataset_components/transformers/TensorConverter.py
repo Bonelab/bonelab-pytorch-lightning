@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import torch
 
 from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
@@ -8,7 +9,7 @@ from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
 
 
 class TensorConverter(BaseTransformer):
-    """ A class to convert samples from numpy arrays to pytorch tensors """
+    """A class to convert samples from numpy arrays to pytorch tensors"""
 
     def __init__(self, ohe: bool = False) -> None:
         """
@@ -38,7 +39,7 @@ class TensorConverter(BaseTransformer):
         return self._ohe
 
     def __call__(
-            self, sample: tuple[np.ndarray, np.ndarray]
+        self, sample: tuple[np.ndarray, np.ndarray]
     ) -> tuple[torch.Tensor, torch.Tensor]:
         image, masks = sample
         image, masks = self._image_and_mask_to_tensors(image, masks)
