@@ -145,7 +145,3 @@ switch to your branch, and click the button that says "submit pull request."
 If the tests and style checks pass it can be merged.
 
 [Full explanation on GitHub Docs.](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
-
-## Segmentation models to be incorporated (or use monai):
-
-UNETR: https://github.com/Project-MONAI/research-contributions/tree/main/UNETR/BTCV
