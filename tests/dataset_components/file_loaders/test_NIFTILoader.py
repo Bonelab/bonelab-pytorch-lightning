@@ -1,6 +1,6 @@
 import unittest
 
-from blpytorchlightning.dataset_components.NIFTILoader import NIFTILoader
+from blpytorchlightning.dataset_components.file_loaders.NIFTILoader import NIFTILoader
 
 
 class TestNIFTILoader(unittest.TestCase):

@@ -6,7 +6,7 @@ import numpy as np
 import os
 from vtk import vtkNIFTIImageReader
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
     BaseFileLoader,
 )
 
