@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from typing import Union
 
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import (
+from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )
 

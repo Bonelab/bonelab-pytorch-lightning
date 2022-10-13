@@ -1,13 +1,13 @@
 import unittest
 
-from blpytorchlightning.dataset_components.base_classes.BaseTransformer import BaseTransformer
+from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import BaseFileLoader
 
 
-class TestTransformer(unittest.TestCase):
+class TestBaseFileLoader(unittest.TestCase):
     """ Test that we can import the module but cannot instantiate the abstract base class. """
     def test_cannot_instantiate_abc(self):
         with self.assertRaises(TypeError):
-            BaseTransformer()
+            BaseFileLoader()
 
 
 if __name__ == '__main__':

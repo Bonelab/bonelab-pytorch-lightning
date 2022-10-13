@@ -1,13 +1,13 @@
 import unittest
 
-from blpytorchlightning.dataset_components.base_classes.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.transformers.BaseTransformer import BaseTransformer
 
 
-class TestBaseSampler(unittest.TestCase):
+class TestTransformer(unittest.TestCase):
     """ Test that we can import the module but cannot instantiate the abstract base class. """
     def test_cannot_instantiate_abc(self):
         with self.assertRaises(TypeError):
-            BaseSampler()
+            BaseTransformer()
 
 
 if __name__ == '__main__':

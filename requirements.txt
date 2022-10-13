@@ -1,5 +1,10 @@
+# setup
 setuptools
-numpy
 pyyaml
+
+# style
 flake8
 black
+
+# deep learning
+monai

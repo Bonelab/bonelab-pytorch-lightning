@@ -64,6 +64,7 @@ class Layer(nn.Module):
         super().__init__()
 
         conv = nn.Conv3d if is_3d else nn.Conv2d
+        dropout_op = nn.Dropout3d if is_3d else nn.Dropout2d
 
         self.layer = nn.Sequential(
             conv(
@@ -71,7 +72,7 @@ class Layer(nn.Module):
             ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
-            nn.Dropout2d(dropout),
+            dropout_op(dropout),
             conv(
                 outputs,
                 outputs,
@@ -81,7 +82,7 @@ class Layer(nn.Module):
             ),
             nn.ReLU(inplace=True),
             nn.GroupNorm(groups, outputs),
-            nn.Dropout2d(dropout),
+            dropout_op(dropout),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -158,6 +159,9 @@ class UNet(nn.Module):
         self.scale_factor = 2
         self.upsample_mode = upsample_mode
         self.is_3d = is_3d
+        # if we selected 3D mode and bilinear upsampling, we actually have to use trilinear upsampling
+        if self.is_3d and self.upsample_mode == "bilinear":
+            self.upsample_mode = "trilinear"
         # initialize some module lists for the 4 types of operations
         self.layer_down = nn.ModuleList()
         self.down = nn.ModuleList()
@@ -175,8 +179,9 @@ class UNet(nn.Module):
                 self.is_3d,
             )
         )
+        max_pool = nn.MaxPool3d if self.is_3d else nn.MaxPool2d
         for fi in range(1, len(num_filters)):
-            self.down.append(nn.MaxPool2d(self.scale_factor))
+            self.down.append(max_pool(self.scale_factor))
             self.layer_down.append(
                 Layer(
                     num_filters[fi - 1],
@@ -194,7 +199,7 @@ class UNet(nn.Module):
             )
             self.layer_up.append(
                 Layer(
-                    2 * num_filters[fi - 1],
+                    num_filters[fi - 1] + num_filters[fi],
                     num_filters[fi - 1],
                     self.layer_kernel_size,
                     self.layer_padding,
@@ -230,8 +235,10 @@ class UNet(nn.Module):
             x_down.append(layer_down(down(x_down[-1])))
 
         x = x_down.pop()
+
         for layer_up, up in zip(reversed(self.layer_up), reversed(self.up)):
             x = up(x)
-            x = layer_up(torch.cat([x_down.pop(), x], dim=1))
+            x = torch.cat([x_down.pop(), x], dim=1)
+            x = layer_up(x)
 
         return self.map_to_output(x)

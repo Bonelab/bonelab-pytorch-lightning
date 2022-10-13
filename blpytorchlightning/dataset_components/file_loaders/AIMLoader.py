@@ -8,7 +8,7 @@ from bonelab.util.aim_calibration_header import get_aim_density_equation
 from bonelab.util.vtk_util import vtkImageData_to_numpy
 from enum import Enum
 
-from blpytorchlightning.dataset_components.base_classes.BaseFileLoader import (
+from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
     BaseFileLoader,
 )
 

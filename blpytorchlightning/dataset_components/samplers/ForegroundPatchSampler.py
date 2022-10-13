@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from blpytorchlightning.dataset_components.base_classes.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
 
 
-class PatchSampler(BaseSampler):
-    """A class to sample 3D patches from a 3D HR-pQCT image and masks."""
+class ForegroundPatchSampler(BaseSampler):
+    """A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
+    certain class (or classes) in the masks that has/have been designated as the foreground."""
 
     def __init__(self, patch_width: int = 128, foreground_channel: int = 0) -> None:
         """

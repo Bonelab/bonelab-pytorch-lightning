@@ -1,7 +1,7 @@
 import torch
 import unittest
 
-from blpytorchlightning.dataset_components.UNet2DTransformer import UNet2DTransformer
+from blpytorchlightning.dataset_components.transformers.UNet2DTransformer import UNet2DTransformer
 
 
 def get_torch_module():

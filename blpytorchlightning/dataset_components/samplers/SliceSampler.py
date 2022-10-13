@@ -3,26 +3,20 @@ from __future__ import annotations
 import numpy as np
 from collections.abc import Iterable
 
-from blpytorchlightning.dataset_components.PatchSampler import PatchSampler
+from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
 
 
-class SlicePatchSampler(PatchSampler):
+class SliceSampler(BaseSampler):
     """
     Class to sample a 2D slice from a 3D image and masks.
     """
 
-    def __init__(
-        self,
-        patch_width: int = 128,
-        dims: Iterable = (0, 1, 2),
-        foreground_channel: int = 0,
-    ):
-        super().__init__(patch_width, foreground_channel)
+    def __init__(self, dims: Iterable = (0, 1, 2)):
         try:
             self._dims = set(map(lambda x: int(x), dims))
         except ValueError as e:
             raise ValueError(
-                f"`dim` arg accepts only iterables containing values that are ints or can be cast to ints...\n{e}`"
+                f"`dim` arg accepts only iterables containing values that are ints or can be cast to ints...\n{e}"
             )
         if max(self._dims) > 2 or min(self._dims) < 0:
             raise ValueError(
@@ -56,8 +50,7 @@ class SlicePatchSampler(PatchSampler):
         tuple[np.ndarray, np.ndarray]
             The 2D slice patch sample.
         """
-        sample = self._get_random_slice(*sample)
-        return self._crop_to_foreground(*sample)
+        return self._get_random_slice(*sample)
 
     def _get_random_slice(
         self, image: np.ndarray, masks: np.ndarray
