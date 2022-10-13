@@ -6,28 +6,20 @@ Tasks, dataset components, loss functions, and utilities for using pytorch light
 
 ### 0. Clone this repo
 ```commandline
-<<<<<<< HEAD
-conda create -n blptl -c numerics88 -c conda-forge pytorch torchvision pytorch-lightning torchmetrics scikit-learn numpy pandas scipy matplotlib n88tools vtk simpleitk scikit-image segmentation-models-pytorch
-=======
 # from your main projects folder / wherever you keep your git repos...
 # ... with SSH authentication
 git clone https://github.com/Bonelab/bonelab-pytorch-lightning.git
 # ... or straight HTTPS
 git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
->>>>>>> main
 ```
 
 ### 1. Set up the recommended `blptl` conda environment using `environment.yaml`:
 
 ```commandline
-<<<<<<< HEAD
-conda create -n blptl -c numerics88 -c conda-forge pytorch-gpu torchvision pytorch-lightning torchmetrics scikit-learn numpy pandas scipy matplotlib n88tools vtk simpleitk scikit-image segmentation-models-pytorch
-=======
 cd bonelab-pytorch-lightning
 conda config --set channel_priority flexible
 conda env create -f environment.yaml
 conda activate blptl
->>>>>>> main
 ```
 
 This should work on MacOS and on linux (and on ARC).
