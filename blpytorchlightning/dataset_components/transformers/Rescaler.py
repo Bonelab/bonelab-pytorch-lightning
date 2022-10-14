@@ -21,13 +21,13 @@ class Rescaler(BaseTransformer):
             density space to the unitless [-1,1] interval for normalization.
         """
         try:
-            self._dims = tuple(map(lambda x: float(x), intensity_bounds))
+            self._intensity_bounds = tuple(map(lambda x: float(x), intensity_bounds))
         except ValueError as e:
             raise ValueError(
                 f"`intensity_bounds` arg accepts only iterables containing values that are floats or can be cast to "
                 f"floats...\n{e}"
             )
-        if len(self._dims) != 2:
+        if len(self._intensity_bounds) != 2:
             raise ValueError("`intensity_bounds` arg must be a length-2 iterable")
 
     @property
