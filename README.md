@@ -56,9 +56,29 @@ Create a separate project directory and easily write scripts for training models
 You can see some example scripts in https://github.com/Bonelab/hrpqct-knee-segmentation
 
 ---
-## How to use
+## Documentation
 
-Full sphinx auto-documentation coming soon...
+If you want to view the documentation locally:
+
+```commandline
+cd docs
+make html
+```
+
+Then open up `docs/build/html/index.html` in a local browser.
+
+If you add a new module you can update the docs by doing (starting from the root directory):
+
+```commandline
+cd docs
+sphinx-apidoc -o source ../blpytorchlightning
+make html
+```
+
+When the repo becomes public the docs can be hosted on a public webpage and locally building them won't be necessary.
+
+---
+## How to use
 
 The installed package can be imported at the root level as `blpytorchlightning`.
 
