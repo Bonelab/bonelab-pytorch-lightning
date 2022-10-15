@@ -8,3 +8,7 @@ black
 
 # deep learning
 monai
+
+# docs
+Sphinx
+sphinx-rtd-theme
