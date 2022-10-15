@@ -15,7 +15,9 @@ from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
 
 @dataclass
 class PickledData:
-    """Class for tracking and loading pickled samples"""
+    """
+    Class for tracking and loading pickled samples
+    """
 
     path: str
     epoch: int = 0
@@ -28,6 +30,7 @@ class PickledData:
         -------
         tuple[np.ndarray, np.ndarray]
             The sample.
+
         """
         sample_fn = os.path.join(self.path, f"epoch_{self.epoch:d}.pickle")
         if not os.path.exists(sample_fn):
@@ -53,6 +56,7 @@ class PickledDataset(Dataset):
 
     If you want to use this, you need to create your own Dataset by composition and then implement the `pickle_dataset`
     method to have the Dataset load, sample, and pickle your data. See `HRpQCTDataset` for an example.
+
     """
 
     def __init__(
@@ -83,6 +87,7 @@ class PickledDataset(Dataset):
         Returns
         -------
         int
+
         """
         return len(self._sample_list)
 
@@ -101,6 +106,7 @@ class PickledDataset(Dataset):
         -------
         Union[tuple[np.ndarray, np.ndarray], tuple[torch.Tensor, torch.Tensor]]
             The sample.
+
         """
         sample = self._sample_list[idx].load_sample()
         if self.transformer is not None:
@@ -108,6 +114,8 @@ class PickledDataset(Dataset):
         return sample
 
     def reset(self) -> None:
-        """Reset all samples to epoch 0"""
+        """
+        Reset all samples to epoch 0
+        """
         for s in self._sample_list:
             s.reset()
