@@ -44,7 +44,7 @@ class SeGANTask(ptl.LightningModule):
             The learning rate to pass to the optimizer.
         """
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=['segmentor', 'discriminators'])
         self.segmentor = segmentor
         self.discriminators = torch.nn.ModuleList(discriminators)
         self.loss_function = loss_function
