@@ -49,10 +49,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       
       - name: Create environment
-        run: |
-          cd bonelab-pytorch-lightning
-          conda config --set channel_priority flexible
-          conda env create -f environment.yaml
+        run: conda create -n blptl -c numerics88 -c conda-forge n88tools python=3
       
       - name: Install Bonelab
         run: |
