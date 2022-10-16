@@ -16,7 +16,7 @@ git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
 ### 1. Create a conda environment:
 
 ```commandline
-conda create -n blptl2 -c numerics88 -c conda-forge n88tools python=3
+conda create -n blptl -c numerics88 -c conda-forge n88tools python=3
 conda activate blptl
 ```
 
