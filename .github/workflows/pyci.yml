@@ -1,0 +1,70 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Python CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    [cron: "0 12 * * 0"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        python-version: [3.7]
+    
+    name: ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout bonelab-pytorch-lightning
+        uses: actions/checkout@v3
+        with:
+          path: bonelab-pytorch-lightning
+
+      - name: Checkout Bonelab
+        uses: actions/checkout@v3
+        with:
+          repository: Bonelab/Bonelab
+          path: Bonelab
+
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Create environment
+        run: conda create -n blptl -c numerics88 -c conda-forge n88tools python=3
+      
+      - name: Install Bonelab
+        run: |
+          cd Bonelab
+          conda activate blptl
+          pip install -e .
+      
+      - name: Install bonelab-pytorch-lightning
+        run: |
+          cd bonelab-pytorch-lightning
+          conda activate blptl
+          pip install -e .
+      
+      - name: Run tests
+        run: |
+          cd bonelab-pytorch-lightning
+          conda activate blptl
+          nosetests tests
