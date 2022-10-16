@@ -1,6 +1,10 @@
 # bonelab-pytorch-lightning
 Tasks, dataset components, loss functions, and utilities for using pytorch lightning for deep learning with medical image data.
 
+[<img src="https://github.com/Bonelab/bonelab-pytorch-lightning/actions/workflows/pyci.yml/badge.svg?logo=LOGO">](https://github.com/Bonelab/bonelab-pytorch-lightning/actions)
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 ---
 ## Setup
 
