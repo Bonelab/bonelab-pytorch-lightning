@@ -53,17 +53,20 @@ jobs:
           cd bonelab-pytorch-lightning
           conda config --set channel_priority flexible
           conda env create -f environment.yaml
-          conda activate blptl
       
       - name: Install Bonelab
         run: |
-          cd ../Bonelab
+          cd Bonelab
+          conda activate blptl
           pip install -e .
       
       - name: Install bonelab-pytorch-lightning
         run: |
-          cd ../bonelab-pytorch-lightning
+          cd bonelab-pytorch-lightning
+          conda activate blptl
           pip install -e .
       
       - name: Run tests
-        run: nosetests tests
+        run: |
+          conda activate blptl
+          nosetests tests
