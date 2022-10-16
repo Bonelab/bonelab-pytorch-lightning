@@ -6,7 +6,11 @@ pyyaml
 flake8
 black
 
-# deep learning
+# imaging and deep learning
+vtk
+numpy
+torch
+pytorch-lightning
 monai
 
 # docs

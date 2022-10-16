@@ -13,18 +13,16 @@ git clone https://github.com/Bonelab/bonelab-pytorch-lightning.git
 git clone git@github.com:Bonelab/bonelab-pytorch-lightning.git
 ```
 
-### 1. Set up the recommended `blptl` conda environment using `environment.yaml`:
+### 1. Create a conda environment:
 
 ```commandline
-cd bonelab-pytorch-lightning
-conda config --set channel_priority flexible
-conda env create -f environment.yaml
+conda create -n blptl2 -c numerics88 -c conda-forge n88tools python=3
 conda activate blptl
 ```
 
 This should work on MacOS and on linux (and on ARC).
 
-### 2. Download and install `bonelab`:
+### 2. Download and install `Bonelab`:
 
 ```commandline
 # from your main projects folder / wherever you keep your git repos...
@@ -84,7 +82,7 @@ The installed package can be imported at the root level as `blpytorchlightning`.
 
 `blpytorchlightning.dataset_components` - Components for loading, sampling, and transforming data. 
 Used for constructing pytorch `Datasets` by composition. 
-See `blpytorchlightning.dataset_components.HRpQCTDataset:HRpQCTDataset` for an example of a composed `Dataset`
+See `blpytorchlightning.dataset_components.datasets.ComposedDataset` for a generic/flexible example of a composed `Dataset`
 
 `blpytorchlightning.loss_functions` - Custom differentiable loss functions.
 
@@ -92,7 +90,7 @@ See `blpytorchlightning.dataset_components.HRpQCTDataset:HRpQCTDataset` for an e
 Should all inherit from `torch.nn.Module`.
 
 `blpytorchlightning.tasks` - Custom implemented `pytorch-lightning` "tasks." 
-They abstract away much of the boilerplate code required for a typical deep learning task, e.g. segmentation.
+They abstract away and/or tidy up much of the boilerplate code required for a typical deep learning task, e.g. segmentation.
 Should all inherit from `pytorch_lightning.LightningModule`.
 
 `blpytorchlightning.utils` - Utility functions such as for converting level set embeddings to masks, or detecting zero crossings.
@@ -128,10 +126,12 @@ paper(s) in your doc-strings.
 
 ### 3. Write tests
 
-Currently, unit tests are written using the `unittest` package. We may upgrade at some point. 
+Currently, unit tests are written using the `unittest` package. 
+We may upgrade at some point to use additional packages e.g. `hypothesis`.
 Tests are all located in the `tests/` directory, with a directory structure that mirrors that of the source files.
-If you add a module, add a corresponding test sub-directory. If you add a class or function, add a `unittest.TestCase`.
-If you add functionality to an existing class or method, add appropriate test methods to the existing test case.
+If you add a module, add a corresponding test sub-directory. 
+If you add a class or function, add a test case inheriting from  `unittest.TestCase`.
+If you modify an existing class or function, add or change the appropriate test methods to the existing test case.
 
 ### 4. Run tests
 
@@ -152,7 +152,7 @@ This will automatically fix most style errors.
 Second, run `flake8` at the root level (`bonelab-pytorch-lightning/`):
 
 ```commandline
-flake8
+flake8 blpytorchlightning
 ```
 
 If there is no terminal output, there's no problems. If there is terminal output, those are style errors that `black`
@@ -161,7 +161,7 @@ couldn't fix and that you should go and correct before trying to merge your code
 ### 6. Submit a pull request
 
 The easiest way to do this is from the web interface. Go to https://github.com/Bonelab/bonelab-pytorch-lightning, 
-switch to your branch, and click the button that says "submit pull request." 
+switch to your branch, and click `Contribute` > `Open pull request`. 
 If the tests and style checks pass it can be merged.
 
 [Full explanation on GitHub Docs.](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
