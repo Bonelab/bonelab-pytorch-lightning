@@ -22,7 +22,7 @@ class SegmentationTask(ptl.LightningModule):
     def __init__(
         self,
         model: torch.nn.Module,
-        loss_function: Callable[[torch.Tensor], torch.Tensor],
+        loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         learning_rate: float,
     ) -> None:
         """
