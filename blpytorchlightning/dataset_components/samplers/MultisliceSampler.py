@@ -22,7 +22,7 @@ def wrap_element_by_reflection(x: int, min_val: int, max_val: int):
     """
     if x < min_val:
         return min_val + (min_val - x)
-    elif x > max_val:
+    elif x >= max_val:
         return max_val - (x - max_val)
     else:
         return x
@@ -132,7 +132,7 @@ class MultisliceSampler(BaseSampler):
             stack_slice_indices.insert(0, center_slice_index-n-1)
             stack_slice_indices.append(center_slice_index+n+1)
         stack_slice_indices = list(map(
-            lambda x: wrap_element_by_reflection(x, 0, image.shape[slicing_dim]),
+            lambda x: wrap_element_by_reflection(x, 0, image.shape[slicing_dim]-1),
             stack_slice_indices
         ))
         slicing_list_stack[slicing_dim] = stack_slice_indices
