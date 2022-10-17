@@ -10,7 +10,7 @@ black
 vtk
 numpy
 torch
-cudatoolkit=11.1
+cudatoolkit==11.1
 pytorch-lightning
 monai
 
