@@ -9,7 +9,7 @@ black
 # imaging and deep learning
 vtk
 numpy
-torch==1.12.1+cu110
+torch==1.12.1+cu113
 pytorch-lightning
 monai
 
