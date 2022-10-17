@@ -11,7 +11,14 @@ class SliceSampler(BaseSampler):
     Class to sample a 2D slice from a 3D image and masks.
     """
 
-    def __init__(self, dims: Iterable = (0, 1, 2)):
+    def __init__(self, dims: Iterable = (0, 1, 2)) -> None:
+        """
+        Initialization method.
+
+        Parameters
+        ----------
+        dims
+        """
         try:
             self._dims = set(map(lambda x: int(x), dims))
         except ValueError as e:
