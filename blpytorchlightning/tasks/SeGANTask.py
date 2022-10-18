@@ -22,6 +22,10 @@ class SeGANTask(ptl.LightningModule):
         discriminators: list[torch.nn.Module],
         loss_function: Callable[[torch.Tensor], torch.Tensor],
         learning_rate: float,
+        logger: bool = True,
+        log_on_step: bool = True,
+        log_on_epoch: bool = True,
+        log_sync_dist: bool = True
     ) -> None:
         """
         Initialization method.
@@ -49,6 +53,10 @@ class SeGANTask(ptl.LightningModule):
         self.discriminators = torch.nn.ModuleList(discriminators)
         self.loss_function = loss_function
         self.learning_rate = learning_rate
+        self.log_logger = logger
+        self.log_on_step = log_on_step
+        self.log_on_epoch = log_on_epoch
+        self.log_sync_dist = log_sync_dist
 
     def training_step(
         self,
@@ -79,13 +87,7 @@ class SeGANTask(ptl.LightningModule):
 
         """
         stage = f"train_opt{optimizer_idx}"
-        x, y = batch
-        y_hat, loss = self._compute_segmentation_and_loss(x, y)
-        metrics = {
-            f"{stage}_loss": loss.detach(),
-            **self._get_dsc_metrics(y_hat, y, stage),
-        }
-        self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
+        loss, _ = self._basic_step(batch, batch_idx, stage)
 
         if optimizer_idx == 0:
             # training the segmentor
@@ -93,9 +95,7 @@ class SeGANTask(ptl.LightningModule):
 
         if optimizer_idx == 1:
             # training the discriminators
-            loss *= (
-                -1
-            )  # negate the loss since the discriminators want to maximize the differences
+            loss *= -1  # negate the loss since the discriminators want to maximize the differences
 
         return loss
 
@@ -119,14 +119,7 @@ class SeGANTask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        stage = "val"
-        x, y = batch
-        y_hat, loss = self._compute_segmentation_and_loss(x, y)
-        metrics = {
-            f"{stage}_loss": loss.detach(),
-            **self._get_dsc_metrics(y_hat, y, stage),
-        }
-        self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
+        _, metrics = self._basic_step(batch, batch_idx, "val")
         return metrics
 
     def test_step(
@@ -149,15 +142,49 @@ class SeGANTask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        stage = "test"
+        _, metrics = self._basic_step(batch, batch_idx, "test")
+        return metrics
+
+    def _basic_step(
+            self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
+    ) -> tuple[torch.Tensor, Optional[dict[torch.Tensor]]]:
+        """
+        The basic segmentation step method used by all the other step methods.
+        Segments an image, returns loss and metrics.
+
+        Parameters
+        ----------
+        batch : tuple[torch.Tensor, torch.Tensor]
+            A tuple containing the inputs and targets for a test step.
+
+        batch_idx : int
+            The index of the batch in the dataset. Not used in this method but must be accepted as an argument
+            since pytorch-lightning's Trainers will pass it in during training.
+
+        stage : str
+            The stage of task training the task is currently in, e.g. "train" or "validate". Used for naming keys in
+            the metrics dictionary.
+
+        Returns
+        -------
+        tuple[torch.Tensor, Optional[dict[torch.Tensor]]]
+            The first element of the tuple is the loss value with the graph attached for backprop. The second
+            element of the tuple is the metrics dictionary.
+        """
         x, y = batch
         y_hat, loss = self._compute_segmentation_and_loss(x, y)
         metrics = {
             f"{stage}_loss": loss.detach(),
             **self._get_dsc_metrics(y_hat, y, stage),
         }
-        self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
-        return metrics
+        self.log_dict(
+            metrics,
+            on_step=self.log_on_step,
+            on_epoch=self.log_on_epoch,
+            logger=self.log_logger,
+            sync_dist=self.log_sync_dist
+        )
+        return loss, metrics
 
     def predict_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
