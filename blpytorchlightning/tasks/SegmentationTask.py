@@ -24,6 +24,10 @@ class SegmentationTask(ptl.LightningModule):
         model: torch.nn.Module,
         loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         learning_rate: float,
+        logger: bool = True,
+        log_on_step: bool = True,
+        log_on_epoch: bool = True,
+        log_sync_dist: bool = True
     ) -> None:
         """
         Initialization method.
@@ -44,6 +48,10 @@ class SegmentationTask(ptl.LightningModule):
         self.model = model
         self.loss_function = loss_function
         self.learning_rate = learning_rate
+        self.log_logger = logger
+        self.log_on_step = log_on_step
+        self.log_on_epoch = log_on_epoch
+        self.log_sync_dist = log_sync_dist
 
     def training_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -197,7 +205,13 @@ class SegmentationTask(ptl.LightningModule):
             f"{stage}_loss": loss.detach(),
             **self._get_dsc_metrics(y_hat, y, stage),
         }
-        self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
+        self.log_dict(
+            metrics,
+            on_step=self.log_on_step,
+            on_epoch=self.log_on_epoch,
+            logger=self.log_logger,
+            sync_dist=self.log_sync_dist
+        )
         return loss, metrics
 
     @staticmethod
