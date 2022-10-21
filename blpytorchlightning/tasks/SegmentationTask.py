@@ -27,7 +27,7 @@ class SegmentationTask(ptl.LightningModule):
         logger: bool = True,
         log_on_step: bool = True,
         log_on_epoch: bool = True,
-        log_sync_dist: bool = True
+        log_sync_dist: bool = True,
     ) -> None:
         """
         Initialization method.
@@ -45,6 +45,9 @@ class SegmentationTask(ptl.LightningModule):
 
         """
         super().__init__()
+        self.save_hyperparameters(
+            ignore=["segmentor", "discriminators", "loss_function"]
+        )
         self.model = model
         self.loss_function = loss_function
         self.learning_rate = learning_rate
@@ -210,7 +213,7 @@ class SegmentationTask(ptl.LightningModule):
             on_step=self.log_on_step,
             on_epoch=self.log_on_epoch,
             logger=self.log_logger,
-            sync_dist=self.log_sync_dist
+            sync_dist=self.log_sync_dist,
         )
         return loss, metrics
 

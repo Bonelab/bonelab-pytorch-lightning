@@ -20,12 +20,12 @@ class SeGANTask(ptl.LightningModule):
         self,
         segmentor: torch.nn.Module,
         discriminators: list[torch.nn.Module],
-        loss_function: Callable[[torch.Tensor], torch.Tensor],
+        loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         learning_rate: float,
         logger: bool = True,
         log_on_step: bool = True,
         log_on_epoch: bool = True,
-        log_sync_dist: bool = True
+        log_sync_dist: bool = True,
     ) -> None:
         """
         Initialization method.
@@ -48,7 +48,9 @@ class SeGANTask(ptl.LightningModule):
             The learning rate to pass to the optimizer.
         """
         super().__init__()
-        self.save_hyperparameters(ignore=['segmentor', 'discriminators'])
+        self.save_hyperparameters(
+            ignore=["segmentor", "discriminators", "loss_function"]
+        )
         self.segmentor = segmentor
         self.discriminators = torch.nn.ModuleList(discriminators)
         self.loss_function = loss_function
@@ -95,7 +97,9 @@ class SeGANTask(ptl.LightningModule):
 
         if optimizer_idx == 1:
             # training the discriminators
-            loss *= -1  # negate the loss since the discriminators want to maximize the differences
+            loss *= (
+                -1
+            )  # negate the loss since the discriminators want to maximize the differences
 
         return loss
 
@@ -146,7 +150,7 @@ class SeGANTask(ptl.LightningModule):
         return metrics
 
     def _basic_step(
-            self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
     ) -> tuple[torch.Tensor, Optional[dict[torch.Tensor]]]:
         """
         The basic segmentation step method used by all the other step methods.
@@ -182,7 +186,7 @@ class SeGANTask(ptl.LightningModule):
             on_step=self.log_on_step,
             on_epoch=self.log_on_epoch,
             logger=self.log_logger,
-            sync_dist=self.log_sync_dist
+            sync_dist=self.log_sync_dist,
         )
         return loss, metrics
 
