@@ -46,7 +46,7 @@ class SegmentationTask(ptl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters(
-            ignore=["segmentor", "discriminators", "loss_function"]
+            ignore=["model", "loss_function"]
         )
         self.model = model
         self.loss_function = loss_function
