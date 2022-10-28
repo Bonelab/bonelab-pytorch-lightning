@@ -241,6 +241,8 @@ class SegmentationTask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary with the dice similarity coefficient values for each class in the segmentation.
         """
+        if isinstance(y_hat, list):
+            y_hat = sum(y_hat) / len(y_hat)
         num_classes = y_hat.shape[1]
         y_hat = torch.argmax(y_hat, dim=1)
         metrics = {}

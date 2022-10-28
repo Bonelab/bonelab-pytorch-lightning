@@ -12,6 +12,7 @@ numpy
 torch
 pytorch-lightning
 monai
+einops
 
 # docs
 Sphinx
