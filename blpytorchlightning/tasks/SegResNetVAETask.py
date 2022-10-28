@@ -77,7 +77,6 @@ class SegResNetVAETask(ptl.LightningModule):
             The loss value from the training step, with the graph attached for backprop.
 
         """
-        self.model.training = True
         loss, _ = self._basic_step(batch, batch_idx, "train")
         return loss
 
@@ -101,7 +100,6 @@ class SegResNetVAETask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        self.model.training = True
         _, metrics = self._basic_step(batch, batch_idx, "val")
         return metrics
 
@@ -125,7 +123,6 @@ class SegResNetVAETask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary of performance metrics.
         """
-        self.model.training = True
         _, metrics = self._basic_step(batch, batch_idx, "test")
         return metrics
 
@@ -150,7 +147,6 @@ class SegResNetVAETask(ptl.LightningModule):
             Predictions on the input portion of the batch inputs.
         """
         x, _ = batch
-        self.model.training = False
         y_hat, _ = self.model(x)
         return y_hat
 
@@ -168,7 +164,6 @@ class SegResNetVAETask(ptl.LightningModule):
         torch.Tensor
             The segmentation of the input image.
         """
-        self.model.training = False
         y_hat, _ = self.model(x)
         return y_hat
 
