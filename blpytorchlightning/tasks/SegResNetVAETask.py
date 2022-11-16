@@ -8,7 +8,7 @@ from typing import Optional, Callable
 from blpytorchlightning.utils.error_metrics import dice_similarity_coefficient
 
 
-class SegmentationTask(ptl.LightningModule):
+class SegResNetVAETask(ptl.LightningModule):
     """
     A very basic pytorch-lightning task meant for image segmentation. Adds dice similarity coefficient to the
     metrics that are computed during training. Can be used for 2D or 3D segmentation, with flexible inputs/outputs.
@@ -147,7 +147,8 @@ class SegmentationTask(ptl.LightningModule):
             Predictions on the input portion of the batch inputs.
         """
         x, _ = batch
-        return self.model(x)
+        y_hat, _ = self.model(x)
+        return y_hat
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -163,7 +164,8 @@ class SegmentationTask(ptl.LightningModule):
         torch.Tensor
             The segmentation of the input image.
         """
-        return self.model(x)
+        y_hat, _ = self.model(x)
+        return y_hat
 
     def configure_optimizers(self) -> AdamW:
         """
@@ -202,10 +204,11 @@ class SegmentationTask(ptl.LightningModule):
             element of the tuple is the metrics dictionary.
         """
         x, y = batch
-        y_hat = self.model(x)
+        y_hat, vae_loss = self.model(x)
         loss = self.loss_function(y_hat, y)
         metrics = {
             f"{stage}_loss": loss.detach(),
+            f"{stage}_vae_loss": vae_loss.detach() if vae_loss is not None else 0,
             **self._get_dsc_metrics(y_hat, y, stage),
         }
         self.log_dict(
@@ -215,7 +218,10 @@ class SegmentationTask(ptl.LightningModule):
             logger=self.log_logger,
             sync_dist=self.log_sync_dist,
         )
-        return loss, metrics
+        if vae_loss is not None:
+            return loss + vae_loss, metrics
+        else:
+            return loss, metrics
 
     @staticmethod
     def _get_dsc_metrics(
@@ -241,8 +247,6 @@ class SegmentationTask(ptl.LightningModule):
         dict[torch.Tensor]
             A dictionary with the dice similarity coefficient values for each class in the segmentation.
         """
-        if isinstance(y_hat, list):
-            y_hat = sum(y_hat) / len(y_hat)
         num_classes = y_hat.shape[1]
         y_hat = torch.argmax(y_hat, dim=1)
         metrics = {}

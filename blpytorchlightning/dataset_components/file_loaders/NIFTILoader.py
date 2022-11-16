@@ -12,7 +12,6 @@ from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
 
 
 class NIFTILoader(BaseFileLoader):
-
     def __init__(self, path: str, labels: list[int], pattern: str = "*.nii") -> None:
         """
 
@@ -105,9 +104,8 @@ class NIFTILoader(BaseFileLoader):
         class_segs = []
 
         for c in self._labels:
-             class_segs.append((seg == c).astype(int))
+            class_segs.append((seg == c).astype(int))
 
-        masks = np.stack(class_segs, axis = 0)
-
+        masks = np.stack(class_segs, axis=0)
 
         return image, masks

@@ -37,7 +37,9 @@ class MultisliceSampler(BaseSampler):
     to make that work :)
     """
 
-    def __init__(self, dims: Iterable[int] = (0, 1, 2), num_adjacent_slices: int = 2) -> None:
+    def __init__(
+        self, dims: Iterable[int] = (0, 1, 2), num_adjacent_slices: int = 2
+    ) -> None:
         """
         Initialization method.
 
@@ -86,7 +88,7 @@ class MultisliceSampler(BaseSampler):
         return self._num_adjacent_slices
 
     def __call__(
-            self, sample: tuple[np.ndarray, np.ndarray]
+        self, sample: tuple[np.ndarray, np.ndarray]
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         Pass the sample through this, extracting a slice patch
@@ -104,7 +106,7 @@ class MultisliceSampler(BaseSampler):
         return self._get_random_multislice(*sample)
 
     def _get_random_multislice(
-            self, image: np.ndarray, masks: np.ndarray
+        self, image: np.ndarray, masks: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         Get a random stack of slices in a random dim from the image and mask
@@ -122,19 +124,23 @@ class MultisliceSampler(BaseSampler):
         tuple[np.ndarray, np.ndarray]
             The slice sample.
         """
-        assert(image.shape[0] == 1)
+        assert image.shape[0] == 1
         slicing_dim = np.random.choice(list(self._dims)) + 1
         slicing_list_stack = [slice(None)] * 4
         slicing_list_center = [slice(None)] * 4
         center_slice_index = np.random.randint(image.shape[slicing_dim])
         stack_slice_indices = [center_slice_index]
         for n in range(self._num_adjacent_slices):
-            stack_slice_indices.insert(0, center_slice_index-n-1)
-            stack_slice_indices.append(center_slice_index+n+1)
-        stack_slice_indices = list(map(
-            lambda x: wrap_element_by_reflection(x, 0, image.shape[slicing_dim]-1),
-            stack_slice_indices
-        ))
+            stack_slice_indices.insert(0, center_slice_index - n - 1)
+            stack_slice_indices.append(center_slice_index + n + 1)
+        stack_slice_indices = list(
+            map(
+                lambda x: wrap_element_by_reflection(
+                    x, 0, image.shape[slicing_dim] - 1
+                ),
+                stack_slice_indices,
+            )
+        )
         slicing_list_stack[slicing_dim] = stack_slice_indices
         slicing_list_center[slicing_dim] = center_slice_index
         image = np.moveaxis(image[tuple(slicing_list_stack)], slicing_dim, 1).squeeze(0)
