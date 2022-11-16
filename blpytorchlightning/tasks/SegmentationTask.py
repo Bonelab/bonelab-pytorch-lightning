@@ -28,6 +28,7 @@ class SegmentationTask(ptl.LightningModule):
         log_on_step: bool = True,
         log_on_epoch: bool = True,
         log_sync_dist: bool = True,
+        ohe_targets: bool = False
     ) -> None:
         """
         Initialization method.
@@ -55,6 +56,7 @@ class SegmentationTask(ptl.LightningModule):
         self.log_on_step = log_on_step
         self.log_on_epoch = log_on_epoch
         self.log_sync_dist = log_sync_dist
+        self.ohe_targets = ohe_targets
 
     def training_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -217,9 +219,8 @@ class SegmentationTask(ptl.LightningModule):
         )
         return loss, metrics
 
-    @staticmethod
     def _get_dsc_metrics(
-        y_hat: torch.Tensor, y: torch.Tensor, stage: str
+        self, y_hat: torch.Tensor, y: torch.Tensor, stage: str
     ) -> dict[torch.Tensor]:
         """
         Static method for adding the dice similarity coefficient to the metrics dictionary.
@@ -245,6 +246,8 @@ class SegmentationTask(ptl.LightningModule):
             y_hat = sum(y_hat) / len(y_hat)
         num_classes = y_hat.shape[1]
         y_hat = torch.argmax(y_hat, dim=1)
+        if self.ohe_targets:
+            y = torch.argmax(y, dim=1)
         metrics = {}
         for c in range(num_classes):
             dsc = dice_similarity_coefficient(y == c, y_hat == c)
