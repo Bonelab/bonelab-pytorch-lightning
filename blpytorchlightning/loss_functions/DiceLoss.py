@@ -39,6 +39,10 @@ class DiceLoss(nn.Module):
         for c in range(p.shape[1]):
             loss += 1 - (
                 (2 * (y[:, c, ...] * p[:, c, ...]).sum())
-                / (torch.pow(y[:, c, ...], 2).sum() + torch.pow(p[:, c, ...], 2).sum() + self.eps)
+                / (
+                    torch.pow(y[:, c, ...], 2).sum()
+                    + torch.pow(p[:, c, ...], 2).sum()
+                    + self.eps
+                )
             )
         return loss / p.shape[1]

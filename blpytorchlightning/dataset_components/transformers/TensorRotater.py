@@ -34,7 +34,7 @@ class TensorRotater(BaseTransformer):
         self.dim = dim
 
     def __call__(
-            self, sample: tuple[torch.Tensor, torch.Tensor]
+        self, sample: tuple[torch.Tensor, torch.Tensor]
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         A magic method that allows this function to be called as a function. Pass the sample through, rescale
@@ -52,7 +52,9 @@ class TensorRotater(BaseTransformer):
         """
         image, targets = sample
 
-        dims = np.random.randint(self.dim, size=(2,))  # get two random integers for rotation dims
+        dims = np.random.randint(
+            self.dim, size=(2,)
+        )  # get two random integers for rotation dims
         dims = list(dims + 1)  # add 1 to skip over channel dim, and convert to a list
 
         # if the dims came up the same, this means do not rotate

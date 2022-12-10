@@ -45,9 +45,7 @@ class SegResNetVAETask(ptl.LightningModule):
 
         """
         super().__init__()
-        self.save_hyperparameters(
-            ignore=["model", "loss_function"]
-        )
+        self.save_hyperparameters(ignore=["model", "loss_function"])
         self.model = model
         self.loss_function = loss_function
         self.learning_rate = learning_rate
