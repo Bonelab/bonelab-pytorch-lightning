@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 import os
 
+from glob import glob
+
 from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
     BaseFileLoader,
 )
@@ -66,7 +68,7 @@ class NPZLoader(BaseFileLoader):
         self._targets_type = targets_type
         self._binarize_targets = binarize_targets
         self._add_null_class_to_targets = add_null_class_to_targets
-        self._build_image_list()
+        self._build_data_list()
 
     @property
     def path(self) -> str:
