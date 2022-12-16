@@ -4,6 +4,8 @@ from blpytorchlightning.dataset_components.transformers.BaseTransformer import (
     BaseTransformer,
 )
 
+from typing import List
+
 
 class ToDict(BaseTransformer):
 
