@@ -34,13 +34,30 @@ class FlexibleDataset(Dataset):
         Parameters
         ----------
         file_loader : BaseFileLoader
-            
+            Responsible for managing and loading data from file.
 
         operations : Optional[List[Union[BaseSampler, BaseTransformer]]]
+            A list of sampling and/or transforming objects that will be applied to the data samples in the
+            order they appear in the list.
         """
+        super().__init__()
+        self.file_loader = file_loader
+        self.operations = operations
 
     def __len__(self):
-        pass
+        """
+        A magic method to return how many samples are in the dataset. Necessary to function as iterator.
+        The length of this dataset is just the length of the file_loader.
 
-    def __getitem__(self, idx):
-        pass
+        Returns
+        -------
+        int
+            Number of samples in dataset.
+        """
+        return len(self.file_loader)
+
+    def __getitem__(self, idx: int) -> Union[dict, tuple]:
+        sample = self.file_loader[idx]
+        for operation in operations:
+            sample = operation(sample)
+        return sample
