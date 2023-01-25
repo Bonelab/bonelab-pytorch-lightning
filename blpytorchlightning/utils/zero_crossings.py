@@ -20,7 +20,7 @@ def zero_crossings(x: torch.Tensor) -> torch.Tensor:
     # if x = 0, obviously a zero-crossing
     z = (sign_x == 0)[tuple([slice(None), slice(None)] + [slice(1, -1) for _ in range(num_spatial_dims)])]
     # then, check anywhere the sign differs by 2 in adjacent voxels
-    for d in num_spatial_dims:
+    for d in range(num_spatial_dims):
         st_center = tuple([slice(None), slice(None)] + [slice(1, -1) for _ in range(num_spatial_dims)])
         st_lower = tuple(
             [slice(None), slice(None)]
