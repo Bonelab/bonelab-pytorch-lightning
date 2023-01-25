@@ -16,7 +16,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
         self,
         model: torch.nn.Module,
         embedding_conversion_function: Callable[[torch.Tensor], torch.Tensor],
-        classification_loss_function: Callable[[torch.Tensor], torch.Tensor],
+        classification_loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         curvature_loss_function: Callable[[torch.Tensor], torch.Tensor],
         maggrad_loss_function: Callable[[torch.Tensor], torch.Tensor],
         learning_rate: float,
@@ -33,8 +33,9 @@ class SegmentationEmbeddingTask(SegmentationTask):
 
         embedding_conversion_function : Callable[[torch.Tensor], torch.Tensor]
 
-        classification_loss_function : Callable[[torch.Tensor], torch.Tensor]
-            The classification loss function to optimize. Takes a segmentation and returns a loss value.
+        classification_loss_function : Callable[[torch.Tensor, torch.Tensor], torch.Tensor]
+            The classification loss function to optimize.
+            Takes a segmentation and ground truth and returns a loss value.
 
         curvature_loss_function : Callable[[torch.Tensor], torch.Tensor]
             Curvature regularization function. Takes a level-set embedding and returns a loss value.
@@ -139,5 +140,11 @@ class SegmentationEmbeddingTask(SegmentationTask):
         for k, v in loss_dict.items():
             metrics[f"{stage}_{k}_loss"] = v
         metrics = {**metrics, **self._get_dsc_metrics(y_hat, y, stage)}
-        self.log_dict(metrics, on_step=True, on_epoch=True, logger=True)
+        self.log_dict(
+            metrics,
+            on_step=self.log_on_step,
+            on_epoch=self.log_on_epoch,
+            logger=self.log_logger,
+            sync_dist=self.log_sync_dist,
+        )
         return loss_dict["total"], metrics
