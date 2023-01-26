@@ -130,9 +130,9 @@ class SegmentationEmbeddingTask(SegmentationTask):
             loss_dict["curvature"] += self.loss_functions["curvature"](phi[:, [i], ...])
             loss_dict["maggrad"] += self.loss_functions["maggrad"](phi[:, [i], ...])
         y_hat = self.embedding_conversion_function(phi)
-        classification_loss = self.loss_functions["classification"](y_hat, y)
-        loss_dict["total"] = (
-            classification_loss
+        loss_dict["classification"] = self.loss_functions["classification"](y_hat, y)
+        loss = (
+            loss_dict["classification"]
             + self.lambdas["curvature"] * loss_dict["curvature"]
             + self.lambdas["maggrad"] * loss_dict["maggrad"]
         )
@@ -147,4 +147,4 @@ class SegmentationEmbeddingTask(SegmentationTask):
             logger=self.log_logger,
             sync_dist=self.log_sync_dist,
         )
-        return loss_dict["total"], metrics
+        return loss, metrics
