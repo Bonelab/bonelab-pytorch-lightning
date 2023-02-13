@@ -10,13 +10,7 @@ from blpytorchlightning.utils.error_metrics import dice_similarity_coefficient
 
 class SegResNetVAETask(ptl.LightningModule):
     """
-    A very basic pytorch-lightning task meant for image segmentation. Adds dice similarity coefficient to the
-    metrics that are computed during training. Can be used for 2D or 3D segmentation, with flexible inputs/outputs.
-    Only compatible with models that take an image and return a segmentation with no extra fancy stuff required for
-    training / processing. Should work for UNets and Vision Transformers. Won't work for modified models that predict
-    level-set embeddings. Probably won't work for GANs.
-
-    Child tasks can inherit from this one and define their own `_basic_step` and `forward` methods.
+    Segmentation task designed for use with SegResNetVAE from monai
     """
 
     def __init__(
@@ -45,9 +39,7 @@ class SegResNetVAETask(ptl.LightningModule):
 
         """
         super().__init__()
-        self.save_hyperparameters(
-            ignore=["model", "loss_function"]
-        )
+        self.save_hyperparameters(ignore=["model", "loss_function"])
         self.model = model
         self.loss_function = loss_function
         self.learning_rate = learning_rate

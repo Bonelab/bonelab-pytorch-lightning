@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import torch
-from typing import Callable, Optional
-
-from blpytorchlightning.tasks.SegmentationTask import SegmentationTask
+from blpytorchlightning.tasks.SegResNetVAETask import SegResNetVAETask
 
 
-class SegmentationEmbeddingTask(SegmentationTask):
+class SegResNetVAEEmbeddingTask(SegResNetVAETask):
     """
-    The segmentation task is slightly modified so that we are predicting level-set embeddings rather than classifying
-    voxels directly.
+    Segmentation task designed for use with SegResNetVAE from monai.
+    Modified to have the model output level set embeddings that are then converted to segmentations.
     """
 
     def __init__(
@@ -123,7 +120,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
         """
         loss_dict = {}
         x, y = batch
-        phi = self.model(x)
+        phi, loss_dict["vae"] = self.model(x)
         loss_dict["curvature"] = 0
         loss_dict["maggrad"] = 0
         for i in range(phi.shape[1]):
@@ -135,6 +132,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
             loss_dict["classification"]
             + self.lambdas["curvature"] * loss_dict["curvature"]
             + self.lambdas["maggrad"] * loss_dict["maggrad"]
+            + (loss_dict["vae"] if loss_dict["vae"] is not None else 0)
         )
         metrics = {}
         for k, v in loss_dict.items():

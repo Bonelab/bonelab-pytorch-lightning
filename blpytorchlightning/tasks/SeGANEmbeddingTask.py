@@ -3,18 +3,22 @@ from __future__ import annotations
 import torch
 from typing import Callable, Optional
 
-from blpytorchlightning.tasks.SegmentationTask import SegmentationTask
+from blpytorchlightning.tasks.SeGANTask import SeGANTask
 
 
-class SegmentationEmbeddingTask(SegmentationTask):
+class SeGANEmbeddingTask(SeGANTask):
     """
-    The segmentation task is slightly modified so that we are predicting level-set embeddings rather than classifying
-    voxels directly.
+    A pytorch-lightning task for image segmentation with a GAN. Requires a segmentor and a discriminator, and trains
+    them in an alternating fashion (alternates every training step). The segmentor predicts level-set embeddings
+    that are converted to probabilistic segmentations.
+    Reference: https://doi.org/10.1007/s12021-018-9377-x
+    Adds dice similarity coefficient to the metrics that are computed during training.
     """
 
     def __init__(
         self,
-        model: torch.nn.Module,
+        segmentor: torch.nn.Module,
+        discriminators: list[torch.nn.Module],
         embedding_conversion_function: Callable[[torch.Tensor], torch.Tensor],
         classification_loss_function: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
         curvature_loss_function: Callable[[torch.Tensor], torch.Tensor],
@@ -22,14 +26,18 @@ class SegmentationEmbeddingTask(SegmentationTask):
         learning_rate: float,
         lambda_curvature: float = 1e-3,
         lambda_maggrad: float = 1e-3,
-    ):
+    ) -> None:
         """
         Initialization method.
 
         Parameters
         ----------
-        model : torch.nn.Module
-            The model to train for the task. Should take an image and produce a segmentation.
+        segmentor : torch.nn.Module
+            A pytorch module for segmenting images. Should take an image and return a segmentation.
+
+        discriminators : list[torch.nn.Module]
+            A list of pytorch modules for generating useful multi-scale feature maps from segmentation-masked images.
+            Should take an image and return a list of pytorch tensors with feature maps at several levels of resolution.
 
         embedding_conversion_function : Callable[[torch.Tensor], torch.Tensor]
 
@@ -52,7 +60,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
         lambda_maggrad : float
             Regularization coefficient for the magnitude gradient egularization loss function.
         """
-        super().__init__(model, None, learning_rate)
+        super().__init__(segmentor, discriminators, None, learning_rate)
         self.embedding_conversion_function = embedding_conversion_function
         self.loss_functions = {
             "classification": classification_loss_function,
@@ -76,7 +84,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
             The segmentation of the input image.
 
         """
-        return self.embedding_conversion_function(self.model(x))
+        return self.embedding_conversion_function(self.segmentor(x))
 
     def forward_embeddings(self, x):
         """
@@ -93,10 +101,44 @@ class SegmentationEmbeddingTask(SegmentationTask):
             The level-set embeddings of the surfaces of the segmentation of the input image.
 
         """
-        return self.model(x)
+        return self.segmentor(x)
+
+    def training_step(
+        self,
+        batch: tuple[torch.Tensor, torch.Tensor],
+        batch_idx: int,
+        optimizer_idx: int,
+    ) -> torch.Tensor:
+        """
+        Training step method. Negate the loss value if the discriminators are being trained.
+
+        Parameters
+        ----------
+        batch : tuple[torch.Tensor, torch.Tensor]
+            A tuple containing the inputs and targets for a training step.
+
+        batch_idx : int
+            The index of the batch in the dataset. Not used in this method but must be accepted as an argument
+            since pytorch-lightning's Trainers will pass it in during training.
+
+        optimizer_idx : int
+            The index into the collection of optimizers in the module that indicates which optimizer
+            is currently being used. In this task, the segmentor and discriminators have separate optimizers.
+
+        Returns
+        -------
+        torch.Tensor
+            The loss value from the training step, with the graph attached for backprop.
+
+        """
+        stage = f"train_opt{optimizer_idx}"
+        loss, _ = self._basic_step(batch, batch_idx, stage, optimizer_idx)
+
+        return loss
 
     def _basic_step(
-        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int, stage: str,
+        optimizer_idx: int = 0
     ) -> tuple[torch.Tensor, Optional[dict[torch.Tensor]]]:
         """
         The basic segmentation step method used by all the other step methods.
@@ -115,6 +157,9 @@ class SegmentationEmbeddingTask(SegmentationTask):
             The stage of task training the task is currently in, e.g. "train" or "validate". Used for naming keys in
             the metrics dictionary.
 
+        optimizer_idx : int
+            The index of the optimizer we are using in this minibatch
+
         Returns
         -------
         tuple[torch.Tensor, Optional[dict[torch.Tensor]]]
@@ -130,12 +175,21 @@ class SegmentationEmbeddingTask(SegmentationTask):
             loss_dict["curvature"] += self.loss_functions["curvature"](phi[:, [i], ...])
             loss_dict["maggrad"] += self.loss_functions["maggrad"](phi[:, [i], ...])
         y_hat = self.embedding_conversion_function(phi)
-        loss_dict["classification"] = self.loss_functions["classification"](y_hat, y)
-        loss = (
-            loss_dict["classification"]
-            + self.lambdas["curvature"] * loss_dict["curvature"]
-            + self.lambdas["maggrad"] * loss_dict["maggrad"]
-        )
+        loss_dict["classification"] = 0
+        for i, d in enumerate(self.discriminators):
+            x_true_masked = (y == i).unsqueeze(1) * x
+            x_pred_masked = y_hat[:, [i], :, :] * x
+            true_features = d(x_true_masked)
+            pred_features = d(x_pred_masked)
+            for tf, pf in zip(true_features, pred_features):
+                loss_dict["classification"] += (
+                    self.loss_functions["classification"](pf, tf)
+                    / (len(true_features) * len(self.discriminators))
+                )
+        if optimizer_idx == 1:
+            # training the discriminators
+            loss_dict["classification"] *= -1
+            # negate the loss since the discriminators want to maximize the differences
         metrics = {}
         for k, v in loss_dict.items():
             metrics[f"{stage}_{k}_loss"] = v
@@ -147,4 +201,7 @@ class SegmentationEmbeddingTask(SegmentationTask):
             logger=self.log_logger,
             sync_dist=self.log_sync_dist,
         )
+        loss = 0
+        for v in loss_dict.values():
+            loss += v
         return loss, metrics

@@ -84,7 +84,7 @@ def create_convert_embeddings_to_predictions(
         torch.Tensor
             A Tensor with three channels: likelihoods of being in the cortical, trabecular, background compartments.
         """
-        phi_peri, phi_endo = embeddings[:, 0, :, :], embeddings[:, 1, :, :]
+        phi_peri, phi_endo = embeddings[:, 0, ...], embeddings[:, 1, ...]
         # convert surface embeddings into voxel-wise class predictions
         pred_cort = heaviside(-phi_peri) * heaviside(phi_endo)
         pred_trab = heaviside(-phi_endo)
