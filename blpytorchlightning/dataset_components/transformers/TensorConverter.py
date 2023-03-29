@@ -71,5 +71,5 @@ class TensorConverter(BaseTransformer):
             masks = torch.argmax(masks, dim=0)
         elif masks.shape[0] == 1 and not self.ohe:
             # if there is only a single channel in the mask and we do not want a OHE then squeeze channels dim
-            masks.squeeze(0)
+            masks = masks.squeeze(0)
         return image, masks
