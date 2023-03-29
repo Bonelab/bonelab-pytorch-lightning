@@ -1,0 +1,19 @@
+# setup
+setuptools
+pyyaml
+
+# style
+flake8
+black
+
+# imaging and deep learning
+vtk
+numpy
+--extra-index-url https://download.pytorch.org/whl/cu102
+torch==1.12.1+cu102
+pytorch-lightning
+monai
+
+# docs
+Sphinx
+sphinx-rtd-theme
