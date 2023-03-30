@@ -66,7 +66,7 @@ class TensorConverter(BaseTransformer):
         """
         image = np.ascontiguousarray(image, dtype=np.float32)
         image = torch.from_numpy(image).float()
-        masks = torch.from_numpy(masks > 0).float()
+        masks = torch.from_numpy(masks > 0).long()
         if masks.shape[0] > 1 and not self._ohe:
             masks = torch.argmax(masks, dim=0)
         elif masks.shape[0] == 1 and not self.ohe:
