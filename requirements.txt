@@ -10,7 +10,7 @@ black
 vtk
 numpy
 torch
-pytorch-lightning=1.9.4
+pytorch-lightning==1.9.4
 monai
 einops
 
