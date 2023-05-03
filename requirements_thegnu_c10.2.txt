@@ -11,7 +11,7 @@ vtk
 numpy
 --extra-index-url https://download.pytorch.org/whl/cu102
 torch==1.12.1+cu102
-pytorch-lightning
+pytorch-lightning==1.9.4
 monai
 
 # docs
