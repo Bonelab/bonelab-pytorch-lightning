@@ -3,13 +3,14 @@ from __future__ import annotations
 import numpy as np
 
 from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.samplers.PatchSampler import PatchSampler
 
 
-class ForegroundPatchSampler(BaseSampler):
+class ForegroundPatchSampler(PatchSampler):
     """A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
     certain class (or classes) in the masks that has/have been designated as the foreground."""
 
-    def __init__(self, patch_width: int = 128, foreground_channel: int = 0) -> None:
+    def __init__(self, patch_width: int = 128, foreground_channel: int = 0, prob: float = 1.0) -> None:
         """
         Initialization method
 
@@ -22,20 +23,20 @@ class ForegroundPatchSampler(BaseSampler):
         foreground_channel : int
             The output class to center the patches on. Default is `0`
 
+        prob : float
+            The probability of selecting a foreground patch vs just selecting a random patch.
+            Must be between 0.0 and 1.0, inclusive. Default is 1.0
+
         """
-        self._patch_width = patch_width
+        super().__init__(patch_width)
         self._foreground_channel = foreground_channel
+        self._prob = prob
 
-    @property
-    def patch_width(self) -> int:
-        """
-        Getter method for `patch_width`
+        if not(isinstance(foreground_channel, int)) or (foreground_channel < 0):
+            raise ValueError(f"`foreground_channel` must be a positive integer, got {foreground_channel}")
 
-        Returns
-        -------
-        int
-        """
-        return self._patch_width
+        if not(isinstance(prob, float)) or (prob < 0) or (prob > 1):
+            raise ValueError(f"`prob` must be a float where 0.0 <= prob <= 1.0, got {prob}")
 
     @property
     def foreground_channel(self) -> int:
@@ -48,6 +49,17 @@ class ForegroundPatchSampler(BaseSampler):
         """
         return self._foreground_channel
 
+    @property
+    def prob(self) -> float:
+        """
+        Getter method for `prob`
+
+        Returns
+        -------
+        float
+        """
+        return self._prob
+
     def __call__(
         self, sample: tuple[np.ndarray, np.ndarray]
     ) -> tuple[np.ndarray, np.ndarray]:
@@ -57,14 +69,17 @@ class ForegroundPatchSampler(BaseSampler):
         Parameters
         ----------
         sample: tuple[np.ndarray, np.ndarray]
-            The full 3D input sample.
+            The full input sample.
 
         Returns
         -------
         tuple[np.ndarray, np.ndarray]
-            The 3D patch sample.
+            The patch sample.
         """
-        return self._crop_to_foreground(*sample)
+        if np.random.uniform(0, 1) < self._prob:
+            return self._crop_to_foreground(*sample)
+        else:
+            return self._crop(*sample)
 
     def _crop_to_foreground(
         self, image: np.ndarray, masks: np.ndarray

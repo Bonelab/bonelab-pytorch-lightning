@@ -20,6 +20,9 @@ class PatchSampler(BaseSampler):
         """
         self._patch_width = patch_width
 
+        if not(isinstance(patch_width, int)) or (patch_width < 0):
+            raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
+
     @property
     def patch_width(self) -> int:
         """
@@ -40,12 +43,12 @@ class PatchSampler(BaseSampler):
         Parameters
         ----------
         sample: tuple[np.ndarray, np.ndarray]
-            The full 3D input sample.
+            The full input sample.
 
         Returns
         -------
         tuple[np.ndarray, np.ndarray]
-            The 3D patch sample.
+            The patch sample.
         """
         return self._crop(*sample)
 
