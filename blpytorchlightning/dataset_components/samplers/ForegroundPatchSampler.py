@@ -29,6 +29,7 @@ class ForegroundPatchSampler(BaseSampler):
         """
         self._patch_width = patch_width
         self._foreground_channel = foreground_channel
+        self._prob = prob
 
     @property
     def patch_width(self) -> int:
@@ -51,6 +52,17 @@ class ForegroundPatchSampler(BaseSampler):
         int
         """
         return self._foreground_channel
+
+    @property
+    def prob(self) -> float:
+        """
+        Getter method for `prob`
+
+        Returns
+        -------
+        float
+        """
+        return self._prob
 
     def __call__(
         self, sample: tuple[np.ndarray, np.ndarray]
