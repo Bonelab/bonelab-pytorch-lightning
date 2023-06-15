@@ -34,7 +34,7 @@ class ForegroundPatchSampler(BaseSampler):
         if not(isinstance(patch_width, int)) or (patch_width < 0):
             raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
 
-        if not(isintance(foreground_channel, int)) or (foreground_channel < 0):
+        if not(isinstance(foreground_channel, int)) or (foreground_channel < 0):
             raise ValueError(f"`foreground_channel` must be a positive integer, got {foreground_channel}")
 
         if not(isinstance(prob, float)) or (prob < 0) or (prob > 1):
