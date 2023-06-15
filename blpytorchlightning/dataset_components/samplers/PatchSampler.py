@@ -43,12 +43,12 @@ class PatchSampler(BaseSampler):
         Parameters
         ----------
         sample: tuple[np.ndarray, np.ndarray]
-            The full 3D input sample.
+            The full input sample.
 
         Returns
         -------
         tuple[np.ndarray, np.ndarray]
-            The 3D patch sample.
+            The patch sample.
         """
         return self._crop(*sample)
 

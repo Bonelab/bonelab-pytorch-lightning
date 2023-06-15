@@ -69,14 +69,14 @@ class ForegroundPatchSampler(PatchSampler):
         Parameters
         ----------
         sample: tuple[np.ndarray, np.ndarray]
-            The full 3D input sample.
+            The full input sample.
 
         Returns
         -------
         tuple[np.ndarray, np.ndarray]
-            The 3D patch sample.
+            The patch sample.
         """
-        if np.random.uniform(0, 1) < prob:
+        if np.random.uniform(0, 1) < self._prob:
             return self._crop_to_foreground(*sample)
         else:
             return self._crop(*sample)

@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from blpytorchlightning.dataset_components.samplers.ForegroundPatchSampler import ForegroundPatchSampler
 
@@ -8,6 +9,11 @@ class TestForegroundPatchSampler(unittest.TestCase):
 
     def test_can_instantiate(self):
         ForegroundPatchSampler()
+
+    def test_can_sample(self):
+        sampler = ForegroundPatchSampler()
+        sample = (np.zeros((1, 500, 500)), np.zeros((1, 500, 500)))
+        sample = sampler(sample)
 
 
 if __name__ == '__main__':
