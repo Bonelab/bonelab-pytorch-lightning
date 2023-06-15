@@ -3,9 +3,10 @@ from __future__ import annotations
 import numpy as np
 
 from blpytorchlightning.dataset_components.samplers.BaseSampler import BaseSampler
+from blpytorchlightning.dataset_components.samplers.PatchSampler import PatchSampler
 
 
-class ForegroundPatchSampler(BaseSampler):
+class ForegroundPatchSampler(PatchSampler):
     """A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
     certain class (or classes) in the masks that has/have been designated as the foreground."""
 
@@ -27,29 +28,15 @@ class ForegroundPatchSampler(BaseSampler):
             Must be between 0.0 and 1.0, inclusive. Default is 1.0
 
         """
-        self._patch_width = patch_width
+        super().__init__(patch_width)
         self._foreground_channel = foreground_channel
         self._prob = prob
-
-        if not(isinstance(patch_width, int)) or (patch_width < 0):
-            raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
 
         if not(isinstance(foreground_channel, int)) or (foreground_channel < 0):
             raise ValueError(f"`foreground_channel` must be a positive integer, got {foreground_channel}")
 
         if not(isinstance(prob, float)) or (prob < 0) or (prob > 1):
             raise ValueError(f"`prob` must be a float where 0.0 <= prob <= 1.0, got {prob}")
-
-    @property
-    def patch_width(self) -> int:
-        """
-        Getter method for `patch_width`
-
-        Returns
-        -------
-        int
-        """
-        return self._patch_width
 
     @property
     def foreground_channel(self) -> int:
@@ -89,8 +76,10 @@ class ForegroundPatchSampler(BaseSampler):
         tuple[np.ndarray, np.ndarray]
             The 3D patch sample.
         """
-
-        return self._crop_to_foreground(*sample)
+        if np.random.uniform(0, 1) < prob:
+            return self._crop_to_foreground(*sample)
+        else:
+            return self._crop(*sample)
 
     def _crop_to_foreground(
         self, image: np.ndarray, masks: np.ndarray

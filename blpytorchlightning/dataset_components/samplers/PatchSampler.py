@@ -20,6 +20,9 @@ class PatchSampler(BaseSampler):
         """
         self._patch_width = patch_width
 
+        if not(isinstance(patch_width, int)) or (patch_width < 0):
+            raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
+
     @property
     def patch_width(self) -> int:
         """
