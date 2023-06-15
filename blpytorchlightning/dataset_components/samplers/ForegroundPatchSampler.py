@@ -9,7 +9,7 @@ class ForegroundPatchSampler(BaseSampler):
     """A class to sample 2D or 3D patches from a 2D or 3D medical image and masks, with the patches centered on a
     certain class (or classes) in the masks that has/have been designated as the foreground."""
 
-    def __init__(self, patch_width: int = 128, foreground_channel: int = 0) -> None:
+    def __init__(self, patch_width: int = 128, foreground_channel: int = 0, prob: float = 1.0) -> None:
         """
         Initialization method
 
@@ -21,6 +21,10 @@ class ForegroundPatchSampler(BaseSampler):
 
         foreground_channel : int
             The output class to center the patches on. Default is `0`
+
+        prob : float
+            The probability of selecting a foreground patch vs just selecting a random patch.
+            Must be between 0.0 and 1.0, inclusive. Default is 1.0
 
         """
         self._patch_width = patch_width
