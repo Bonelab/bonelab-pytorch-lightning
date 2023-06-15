@@ -31,6 +31,15 @@ class ForegroundPatchSampler(BaseSampler):
         self._foreground_channel = foreground_channel
         self._prob = prob
 
+        if not(isinstance(patch_width, int)) or (patch_width < 0):
+            raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
+
+        if not(isintance(foreground_channel, int)) or (foreground_channel < 0):
+            raise ValueError(f"`foreground_channel` must be a positive integer, got {foreground_channel}")
+
+        if not(isinstance(prob, float)) or (prob < 0) or (prob > 1):
+            raise ValueError(f"`prob` must be a float where 0.0 <= prob <= 1.0, got {prob}")
+
     @property
     def patch_width(self) -> int:
         """
@@ -80,6 +89,7 @@ class ForegroundPatchSampler(BaseSampler):
         tuple[np.ndarray, np.ndarray]
             The 3D patch sample.
         """
+
         return self._crop_to_foreground(*sample)
 
     def _crop_to_foreground(
