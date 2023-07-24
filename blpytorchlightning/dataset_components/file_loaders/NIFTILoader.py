@@ -12,7 +12,13 @@ from blpytorchlightning.dataset_components.file_loaders.BaseFileLoader import (
 
 
 class NIFTILoader(BaseFileLoader):
-    def __init__(self, path: str, labels: list[int], pattern: str = "*.nii") -> None:
+    def __init__(self,
+                 path: str,
+                 labels: list[int],
+                 pattern: str = "*.nii",
+                 image_suffix: str = ".nii",
+                 mask_suffix: str = "_mask.nii.gz"
+                 ) -> None:
         """
 
         Parameters
@@ -20,14 +26,22 @@ class NIFTILoader(BaseFileLoader):
         path: str
             Path to where the data is.
 
+        labels: list[int]
+            The list of labels used in masked image.
+
         pattern: str
             The pattern to use to `glob` to find the data in that directory.
 
-        labels: list[int]
-            The list of labels used in masked image.
+        image_suffix: str
+            The suffix to be replaced by the mask suffix to find a corresponding mask.
+
+        mask_suffix: str
+            The suffix to use to find the mask in the directory corresponding to an image.
         """
         self._path = path
         self._pattern = pattern
+        self._image_suffix = image_suffix
+        self._mask_suffix = mask_suffix
         self._labels = labels
         self._build_image_list()
 
@@ -54,6 +68,30 @@ class NIFTILoader(BaseFileLoader):
             The pattern.
         """
         return self._pattern
+
+
+    @property
+    def image_suffix(self) -> str:
+        """
+
+        Returns
+        -------
+        str
+            The image suffix.
+        """
+        return self._image_suffix
+
+
+    @property
+    def mask_suffix(self) -> str:
+        """
+
+        Returns
+        -------
+        str
+            The mask suffix.
+        """
+        return self._mask_suffix
 
     def _build_image_list(self) -> None:
         """
@@ -95,7 +133,7 @@ class NIFTILoader(BaseFileLoader):
         image = vtkImageData_to_numpy(self.reader.GetOutput())
 
         image = np.expand_dims(image, 0)
-        seg_fn = image_fn.replace(".nii", "_PERI.nii.gz")
+        seg_fn = image_fn.replace(self._image_suffix, self._mask_suffix)
 
         self.reader.SetFileName(seg_fn)
         self.reader.Update()
