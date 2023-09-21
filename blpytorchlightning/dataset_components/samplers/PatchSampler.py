@@ -22,7 +22,7 @@ class PatchSampler(BaseSampler):
             if patch_width < 0:
                 raise ValueError(f"`patch_width` must be a positive integer, got {patch_width}")
             self._patch_width = patch_width
-        if isinstance(patch_width, list):
+        elif isinstance(patch_width, list):
             if any([pw < 0 for pw in patch_width]):
                 raise ValueError(f"`patch_width` must be a list of positive integers, got {patch_width}")
             self._patch_width = np.array(patch_width, dtype=int)
