@@ -9,6 +9,7 @@ black
 # imaging and deep learning
 vtk
 numpy
+scikit-image
 torch
 pytorch-lightning==1.9.4
 monai
